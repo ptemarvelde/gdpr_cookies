@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import json
 from collections import OrderedDict
@@ -7,6 +8,9 @@ import time as time
 from datetime import datetime
 import traceback
 from bs4 import BeautifulSoup
+from webdriver_manager.chrome import ChromeDriverManager
+CHROME_SERVICE = Service(ChromeDriverManager().install())
+
 
 if ('gl_PATH_CHROMEDRIVER' not in globals()) or \
    ('gl_PATH_CHROME_BROWSER' not in globals()) or \
@@ -105,7 +109,7 @@ def download_with_browser(URL,
             CHROMEDRIVER_LOCK.acquire()
         driver = webdriver.Chrome(desired_capabilities=caps,
                                   options=chrome_options,
-                                  executable_path=gl_PATH_CHROMEDRIVER)
+                                  service=CHROME_SERVICE)
         if (CHROMEDRIVER_LOCK is not None) and (lock_released is False):
             CHROMEDRIVER_LOCK.release()
             lock_released = True
@@ -113,7 +117,6 @@ def download_with_browser(URL,
         # Fetch the resource and all embedded URLs
         driver.set_page_load_timeout(PAGE_LOAD_TIMEOUT)
         driver.get(URL)
-
         # We need to put it into a variable, otherwise when
         # calling again "driver.get_log('performance')" it will
         # return None.

@@ -8,3 +8,4 @@ intervaltree
 netaddr
 nltk
 psutil
+webdriver_manager
