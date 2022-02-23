@@ -1,0 +1,10 @@
+ipwhois
+tldextract
+wordsegment
+selenium
+bs4
+dnspython
+intervaltree
+netaddr
+nltk
+psutil
