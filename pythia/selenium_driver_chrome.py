@@ -8,6 +8,7 @@ import time as time
 from datetime import datetime
 import traceback
 from bs4 import BeautifulSoup
+# TODO remove this package, chrome should be in the dependencies somehow
 from webdriver_manager.chrome import ChromeDriverManager
 CHROME_SERVICE = Service(ChromeDriverManager().install())
 
