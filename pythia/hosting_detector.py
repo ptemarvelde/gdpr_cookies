@@ -9,7 +9,7 @@ import socket
 
 
 GL_PRINT_ON_STDOUT = True
-GL_PREPROCESSED_JSON_DATA = "./samples/example.json"
+GL_PREPROCESSED_JSON_DATA = "./samples/example.jsonl"
 GL_OUTPUT_CVS_FILE = "./samples/example_hosting.csv"
 
 RDAP_USED_FIELDS_MAPPING = {

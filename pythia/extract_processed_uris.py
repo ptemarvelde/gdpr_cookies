@@ -16,5 +16,5 @@ def get_list_processed_from_json(FNAME):
 if __name__ == "__main__":
 
     # Example
-    fname_json = "./samples/example.json"
+    fname_json = "./samples/example.jsonl"
     dict_processed_uris = get_list_processed_from_json(fname_json)

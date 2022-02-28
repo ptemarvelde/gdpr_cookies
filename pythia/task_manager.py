@@ -27,7 +27,7 @@ GL_SOURCE_IP = str(json.loads(requests.get('http://jsonip.com').text)["ip"])
 # stdout
 GL_STDOUT_LOCK = multiprocessing.Lock()
 # json output file
-GL_OUTPUT_FILE = "./samples/example.json"
+GL_OUTPUT_FILE = "samples/example.jsonl"
 GL_OUTPUT_FID = io.open(GL_OUTPUT_FILE, 'a', encoding="utf-8")
 GL_OUTPUT_LOCK = multiprocessing.Lock()
 # exception file
@@ -165,7 +165,7 @@ def fetch_info(ELEM):
         # selenium page loads...
         (page_source, page_title, resources_ordlist, redirection_chain,
          exception, exception_str, browserstart_ts,
-         browserend_ts) = download_with_browser(
+         browserend_ts, cookies) = download_with_browser(
              URL=uri,
              RUN_HEADLESS=GL_browser_RUN_HEADLESS,
              PAGE_LOAD_TIMEOUT=GL_browser_PAGE_LOAD_TIMEOUT,
@@ -226,7 +226,8 @@ def fetch_info(ELEM):
                 # dns
                 UNIQUE_DOMAINS_RESOLUTIONS=unique_domains_resolutions,
                 # rdap
-                RDAP_INFOS_DICT=rdap_infos_dict)
+                RDAP_INFOS_DICT=rdap_infos_dict,
+                COOKIES=cookies)
         else:
             struct = generate_struct(SOURCE_IP=GL_SOURCE_IP,
                                      URI=uri,
@@ -242,7 +243,8 @@ def fetch_info(ELEM):
                                      # dns
                                      UNIQUE_DOMAINS_RESOLUTIONS=None,
                                      # rdap
-                                     RDAP_INFOS_DICT=None)
+                                     RDAP_INFOS_DICT=None,
+                                     COOKIES=cookies)
         append_to_file(struct)
     except Exception as e:
         ts = str(datetime.now()).split(".")[0]

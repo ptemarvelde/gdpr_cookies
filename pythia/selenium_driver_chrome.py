@@ -110,14 +110,22 @@ def download_with_browser(URL,
             CHROMEDRIVER_LOCK.acquire()
         driver = webdriver.Chrome(desired_capabilities=caps,
                                   options=chrome_options,
-                                  service=CHROME_SERVICE)
+                                  service=CHROME_SERVICE, )
         if (CHROMEDRIVER_LOCK is not None) and (lock_released is False):
             CHROMEDRIVER_LOCK.release()
             lock_released = True
 
         # Fetch the resource and all embedded URLs
         driver.set_page_load_timeout(PAGE_LOAD_TIMEOUT)
+        req_timestamp = time.time()
         driver.get(URL)
+
+        cookies_list = driver.get_cookies()
+        cookies = {
+            "request_timestamp": req_timestamp,
+            "cookies": cookies_list
+        }
+
         # We need to put it into a variable, otherwise when
         # calling again "driver.get_log('performance')" it will
         # return None.
@@ -265,16 +273,16 @@ def download_with_browser(URL,
     end_ts = time.time()
     return (page_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
-            start_ts, end_ts)
+            start_ts, end_ts, cookies)
 
 
 if __name__ == "__main__":
 
     # Example: HTTPS with Chromium in headless mode
-    url = "https://bitbucket.org/srdjanmatic/pythia.git"
+    url = "https://bitbucket.org/"
     (page_source, page_title, resources_ordlist, redirection_chain,
      exception, exception_str, browserstart_ts,
-     browserend_ts) = download_with_browser(url)
+     browserend_ts, cookies) = download_with_browser(url)
     print("Start URL: %s" % (url))
     if exception is None:
         print("redirection_chain: %s" % (" => ".join([
@@ -296,5 +304,6 @@ if __name__ == "__main__":
     else:
         print("Exception: %s" % (exception))
         print()
+    print("cookies:", json.dumps(cookies, indent=4))
     print("Time spent: %4.2f seconds" % (browserend_ts - browserstart_ts))
     print()

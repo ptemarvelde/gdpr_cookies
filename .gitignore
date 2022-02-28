@@ -1,1 +1,3 @@
 /.idea/*
+pythia/__pycache__/
+pythia/samples/
