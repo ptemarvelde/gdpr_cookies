@@ -27,7 +27,7 @@ GL_SOURCE_IP = str(json.loads(requests.get('http://jsonip.com').text)["ip"])
 # stdout
 GL_STDOUT_LOCK = multiprocessing.Lock()
 # json output file
-GL_OUTPUT_FILE = "samples/example.jsonl"
+GL_OUTPUT_FILE = "samples/example.json"
 GL_OUTPUT_FID = io.open(GL_OUTPUT_FILE, 'a', encoding="utf-8")
 GL_OUTPUT_LOCK = multiprocessing.Lock()
 # exception file
