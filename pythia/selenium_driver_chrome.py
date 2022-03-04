@@ -8,10 +8,13 @@ import time as time
 from datetime import datetime
 import traceback
 from bs4 import BeautifulSoup
-# TODO remove this package, chrome should be in the dependencies somehow
-from webdriver_manager.chrome import ChromeDriverManager
-CHROME_SERVICE = Service(ChromeDriverManager().install())
+import os
 
+USE_BRAVE = True
+
+# NOTE: make sure that both binary and driver have the same version.
+CHROME_SERVICE = Service(executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
+BRAVE_BIN_PATH = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 
 if ('gl_PATH_CHROMEDRIVER' not in globals()) or \
    ('gl_PATH_CHROME_BROWSER' not in globals()) or \
@@ -86,6 +89,13 @@ def download_with_browser(URL,
         chrome_options.add_argument("disable-notifications")
         chrome_options.add_argument("disable-file-system")
         chrome_options.add_argument("allow-running-insecure-content")
+
+        # This excludes Devtools socket logging
+        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        
+        if USE_BRAVE:
+            chrome_options.binary_location = BRAVE_BIN_PATH
+
         if RUN_HEADLESS is True:
             chrome_options.add_argument("headless")
         if gl_SPOOFED_USER_AGENT:
