@@ -285,7 +285,7 @@ def download_with_browser(URL,
 
 
     # detecting banner
-    patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent', 'accept all cookies', 'cookie settings',
+    patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent', 'accept all cookies', 'cookie settings', 'I agree', 'I accept'
                 'OneTrust-Consent', 'Civic Cookie Control', 'Clickio Consent Tool',
                 'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information', 'Crownpeak (Evidon)',
                 'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
