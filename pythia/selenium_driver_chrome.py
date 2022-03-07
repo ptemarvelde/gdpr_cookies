@@ -7,10 +7,11 @@ from collections import OrderedDict
 import time as time
 from datetime import datetime
 import traceback
+import re
 from bs4 import BeautifulSoup
 import os
 
-USE_BRAVE = True
+USE_BRAVE = False
 
 # NOTE: make sure that both binary and driver have the same version.
 CHROME_SERVICE = Service(executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
@@ -281,9 +282,22 @@ def download_with_browser(URL,
         if (CHROMEDRIVER_LOCK is not None) and (lock_released is False):
             CHROMEDRIVER_LOCK.release()
     end_ts = time.time()
+
+
+    # detecting banner
+    patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent', 'accept all cookies', 'cookie settings',
+                'OneTrust-Consent', 'Civic Cookie Control', 'Clickio Consent Tool',
+                'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information', 'Crownpeak (Evidon)',
+                'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
+    banner_detected = False
+    for pattern in patterns:
+        if re.search(pattern, page_source, flags=re.IGNORECASE):
+            banner_detected = True
+            break
+
     return (page_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
-            start_ts, end_ts, cookies)
+            start_ts, end_ts, cookies, banner_detected)
 
 
 if __name__ == "__main__":

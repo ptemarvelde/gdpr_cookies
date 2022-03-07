@@ -12,7 +12,8 @@ def generate_struct(SOURCE_IP,
                     UNIQUE_DOMAINS_RESOLUTIONS,
                     # rdap
                     RDAP_INFOS_DICT,
-                    COOKIES):
+                    COOKIES,
+                    BANNER_DETECTED):
     browser_module = {
         "uri": URI,
         "page_source": PAGE_SOURCE,
@@ -23,7 +24,8 @@ def generate_struct(SOURCE_IP,
         "exception_str": EXCEPTION_STR,
         "start_ts": BROWSERSTART_TS,
         "end_ts": BROWSEREND_TS,
-        "cookies": COOKIES
+        "cookies": COOKIES,
+        "banner_detected": BANNER_DETECTED
     }
     if UNIQUE_DOMAINS_RESOLUTIONS is not None:
         dns_module = []
