@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import logging
+from pathlib import Path
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -10,6 +13,7 @@ import traceback
 import re
 from bs4 import BeautifulSoup
 import os
+
 
 USE_BRAVE = False
 
@@ -33,6 +37,7 @@ def download_with_browser(URL,
                           MIN_PAGE_LOAD_TIMEOUT=4,
                           PAGE_LOAD_TIMEOUT=60,
                           CHROMEDRIVER_LOCK=None):
+    from pythia.task_manager import GL_SCREENSHOT_DIR
 
     def get_new_netlog_msgs(DRIVER):
         try:
@@ -90,6 +95,7 @@ def download_with_browser(URL,
         chrome_options.add_argument("disable-notifications")
         chrome_options.add_argument("disable-file-system")
         chrome_options.add_argument("allow-running-insecure-content")
+        chrome_options.add_argument("window-size=1980,960")
 
         # This excludes Devtools socket logging
         chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
@@ -136,6 +142,12 @@ def download_with_browser(URL,
             "request_timestamp": req_timestamp,
             "cookies": cookies_list
         }
+        # sleep to let banner appear
+        time.sleep(5)
+
+        screenshot_path: str = str((GL_SCREENSHOT_DIR / (URL.replace('://', '_') + ".png")).resolve())
+        if not driver.save_screenshot(str(screenshot_path)):
+            screenshot_path = "Screenshot failed"
 
         # We need to put it into a variable, otherwise when
         # calling again "driver.get_log('performance')" it will
@@ -147,8 +159,8 @@ def download_with_browser(URL,
             if (message["method"] == "Page.frameNavigated") and \
                ("params" in message) and \
                ("frame" in message["params"]) and \
-               ("unreachableUrl" in message["params"]["frame"] and \
-        message["params"]["frame"]["unreachableUrl"] == driver.current_url):
+               ("unreachableUrl" in message["params"]["frame"] and
+                message["params"]["frame"]["unreachableUrl"] == driver.current_url):
                 landing_url_reachable = False
         if landing_url_reachable:
             # if there's a minimum waiting treshold, we wait in case
@@ -230,6 +242,7 @@ def download_with_browser(URL,
             driver.switch_to.window(handle)
             driver.close()
     except Exception as e:
+        raise e
         ts = str(datetime.now()).split(".")[0]
         exception = str(e).split("\n")[0]
         exception_str = "[%s] Exception: %s\n" % (ts, exception)
@@ -297,7 +310,8 @@ def download_with_browser(URL,
 
     return (page_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
-            start_ts, end_ts, cookies, banner_detected)
+            start_ts, end_ts, cookies, banner_detected,
+            screenshot_path)
 
 
 if __name__ == "__main__":

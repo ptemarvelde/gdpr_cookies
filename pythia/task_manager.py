@@ -1,25 +1,22 @@
 #!/usr/bin/env python
-from selenium_driver_chrome import *
-from dns_resolve import *
-from rdap_query import *
-from process_struct import *
-from extract_processed_uris import *
-from urllib.parse import urlparse
-import time
-import socket
-from datetime import datetime
-import psutil
-import intervaltree
-from netaddr import IPNetwork, IPAddress
-import requests
 import io
-import multiprocessing
-import sys
+from urllib.parse import urlparse
 
+import psutil
+import requests
+from tqdm import tqdm
+from pathlib import Path
+
+from dns_resolve import *
+from extract_processed_uris import *
+from process_struct import *
+from rdap_query import *
+from selenium_driver_chrome import download_with_browser
 
 GL_browser_PAGE_LOAD_TIMEOUT = 60
 GL_browser_RUN_HEADLESS = True
 GL_CHROMEDRIVER_LOCK = multiprocessing.Lock()
+INCLUDE_RDAP = True
 
 # find the public IP from which we are fetching the information
 GL_SOURCE_IP = str(json.loads(requests.get('http://jsonip.com').text)["ip"])
@@ -27,11 +24,15 @@ GL_SOURCE_IP = str(json.loads(requests.get('http://jsonip.com').text)["ip"])
 # stdout
 GL_STDOUT_LOCK = multiprocessing.Lock()
 # json output file
-GL_OUTPUT_FILE = "samples/example.json"
+GL_OUTPUT_DIR = Path("../resources/dutch_run_1/")
+GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
+GL_OUTPUT_FILE = GL_OUTPUT_DIR / "results.jsonl"
+GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / "screenshots"
+GL_SCREENSHOT_DIR.mkdir(exist_ok=True, parents=True)
 GL_OUTPUT_FID = io.open(GL_OUTPUT_FILE, 'a', encoding="utf-8")
 GL_OUTPUT_LOCK = multiprocessing.Lock()
 # exception file
-GL_EXCEPTION_LOG_FILE = "./samples/example.log"
+GL_EXCEPTION_LOG_FILE = GL_OUTPUT_DIR / "exceptions.log"
 GL_EXCEPTION_LOG_FID = open(GL_EXCEPTION_LOG_FILE, 'a', encoding='utf-8')
 GL_EXCEPTION_LOCK = multiprocessing.Lock()
 
@@ -39,13 +40,14 @@ GL_EXCEPTION_LOCK = multiprocessing.Lock()
 GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
 
 # parallel browser instances
-GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 2
+GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 10
 # chunks size to be processed in batch
 GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
 GL_CRAWL_CHUNK_SLEEP = 30
 
-GL_URI_FILE = "./samples/uris.csv"
+GL_URI_FILE = "../resources/data/20220308-173703/dutch_top_50"
+# GL_URI_FILE = "../util/data/dutch_top_50"
 GL_MAX_DOMAINS_TO_CONTACT = 1000000
 GL_SHUFFLE_DOMAINS_LIST = True
 
@@ -165,7 +167,7 @@ def fetch_info(ELEM):
         # selenium page loads...
         (page_source, page_title, resources_ordlist, redirection_chain,
          exception, exception_str, browserstart_ts,
-         browserend_ts, cookies, banner_detected) = download_with_browser(
+         browserend_ts, cookies, banner_detected, screenshot_file) = download_with_browser(
              URL=uri,
              RUN_HEADLESS=GL_browser_RUN_HEADLESS,
              PAGE_LOAD_TIMEOUT=GL_browser_PAGE_LOAD_TIMEOUT,
@@ -228,7 +230,9 @@ def fetch_info(ELEM):
                 # rdap
                 RDAP_INFOS_DICT=rdap_infos_dict,
                 COOKIES=cookies,
-                BANNER_DETECTED=banner_detected)
+                BANNER_DETECTED=banner_detected,
+                SCREENSHOT_FILE=screenshot_file
+            )
         else:
             struct = generate_struct(SOURCE_IP=GL_SOURCE_IP,
                                      URI=uri,
@@ -246,7 +250,8 @@ def fetch_info(ELEM):
                                      # rdap
                                      RDAP_INFOS_DICT=None,
                                      COOKIES=cookies,
-                                     BANNER_DETECTED=banner_detected)
+                                     BANNER_DETECTED=banner_detected,
+                                     SCREENSHOT_FILE=screenshot_file)
         append_to_file(struct)
     except Exception as e:
         ts = str(datetime.now()).split(".")[0]
@@ -270,7 +275,7 @@ def main():
 
     tot_processed = 0
     # process in chunks
-    for i in range(0, len(rankuri_list), GL_CRAWL_CHUNK_SIZE):
+    for i in tqdm(range(0, len(rankuri_list), GL_CRAWL_CHUNK_SIZE)):
         p = multiprocessing.Pool(GL_MAX_NUM_CHROMEDRIVER_INSTANCES)
         chunk = rankuri_list[i: i+GL_CRAWL_CHUNK_SIZE]
         p.map(fetch_info, chunk)
