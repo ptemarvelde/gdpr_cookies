@@ -2,6 +2,7 @@
 import logging
 from pathlib import Path
 
+import selenium
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -135,7 +136,10 @@ def download_with_browser(URL,
         # Fetch the resource and all embedded URLs
         driver.set_page_load_timeout(PAGE_LOAD_TIMEOUT)
         req_timestamp = time.time()
-        driver.get(URL)
+        try:
+            driver.get(URL)
+        except Exception as e:
+            driver.get(URL)
 
         cookies_list = driver.get_cookies()
         cookies = {
@@ -242,7 +246,7 @@ def download_with_browser(URL,
             driver.switch_to.window(handle)
             driver.close()
     except Exception as e:
-        raise e
+        # raise e
         ts = str(datetime.now()).split(".")[0]
         exception = str(e).split("\n")[0]
         exception_str = "[%s] Exception: %s\n" % (ts, exception)
@@ -303,10 +307,11 @@ def download_with_browser(URL,
                 'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information', 'Crownpeak (Evidon)',
                 'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
     banner_detected = False
-    for pattern in patterns:
-        if re.search(pattern, page_source, flags=re.IGNORECASE):
-            banner_detected = True
-            break
+    if page_source:
+        for pattern in patterns:
+            if re.search(pattern, page_source, flags=re.IGNORECASE):
+                banner_detected = True
+                break
 
     return (page_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
