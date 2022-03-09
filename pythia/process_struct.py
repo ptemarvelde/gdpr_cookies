@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import json
 
-from pythia.task_manager import INCLUDE_RDAP
-
 
 def generate_struct(SOURCE_IP,
                     URI,
@@ -51,7 +49,7 @@ def generate_struct(SOURCE_IP,
     else:
         dns_module = None
 
-    if INCLUDE_RDAP and RDAP_INFOS_DICT is not None:
+    if RDAP_INFOS_DICT is not None:
         rdap_module = []
         for k, v in RDAP_INFOS_DICT.items():
             ip = k
