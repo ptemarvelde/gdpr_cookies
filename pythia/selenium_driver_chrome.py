@@ -302,22 +302,64 @@ def download_with_browser(URL,
 
 
     # detecting banner
-    patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent', 'accept all cookies', 'cookie settings', 'I agree', 'I accept'
-                'OneTrust-Consent', 'Civic Cookie Control', 'Clickio Consent Tool',
-                'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information', 'Crownpeak (Evidon)',
-                'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
-    banner_detected = False
-    if page_source:
-        for pattern in patterns:
-            if re.search(pattern, page_source, flags=re.IGNORECASE):
-                banner_detected = True
-                break
+    banner_detected = (detect_banner_keywords() or detect_banner_cookie_libs())
 
     return (page_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
             start_ts, end_ts, cookies, banner_detected,
             screenshot_path)
 
+def detect_banner_keywords() -> bool:
+    patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent',
+                'accept all cookies', 'cookie settings', 'I agree', 'I accept'
+                                                                    'OneTrust-Consent', 'Civic Cookie Control',
+                'Clickio Consent Tool',
+                'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information',
+                'Crownpeak (Evidon)',
+                'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
+    if page_source:
+        for pattern in patterns:
+            if re.search(pattern, page_source, flags=re.IGNORECASE):
+                return True
+    return False
+
+def detect_banner_cookie_libs() -> bool:
+    lib_js_file_names = [
+        "https://cc.cdn.civiccomputing.com/9/cookieControl-9.x.min.js", # Civic Cookie Control
+        "https://cc.cdn.civiccomputing.com/9/cookieControl-9.5.min.js",
+        "clickio.mgr.consensu.org/t/consent_225761.js", # Clickio Consent Tool
+        , # consentmanager.net
+        , # cookieBAR
+        , #Cookiebot
+        , # Cookie Consent
+        , # Cookie Information
+        , # Cookie Script
+        , # Crownpeak (Evidon)
+        , # Didomi
+        , # jquery.cookieBar
+        , # jQuery EU Cookie Law popups
+        , # OneTrust
+        , # Quantcast Choice
+        , # TrustArc (TRUSTe)
+        , # Cookie Bar (WordPress Plugins)
+        , # Cookie Consent
+        , # Cookie Law Bar
+        , # Cookie Notice for GDPR
+        , # Custom Cookie Message
+        , # EU Cookie Law
+        , # GDPR Cookie Compliance
+        , # GDPR Cookie Consent
+        , # GDPR Tools
+        , # WF Cookie Consent
+        , # Cookie Control (Drupal Modules)
+        , # EU Cookie Compliance
+        , # Simple Cookie Compliance
+    ]
+    if page_source:
+        for pattern in lib_js_file_names:
+            if re.search(pattern, page_source, flags=re.IGNORECASE):
+                return True
+    return False
 
 if __name__ == "__main__":
 
