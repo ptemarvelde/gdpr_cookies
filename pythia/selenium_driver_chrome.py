@@ -285,19 +285,24 @@ def download_with_browser(URL,
 
 
     # detecting banner
-    patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent', 'accept all cookies', 'cookie settings', 'I agree', 'I accept'
+    patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent', 'accept all cookies', 'cookie settings', 'I agree', 'I accept',
+                'Ik ga akkoord', 'cookies accepteren', 'gebruik van cookies', 'cookievoorkeuren',
                 'OneTrust-Consent', 'Civic Cookie Control', 'Clickio Consent Tool',
                 'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information', 'Crownpeak (Evidon)',
                 'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
-    banner_detected = False
+
+    banner_matched_on = []
     for pattern in patterns:
         if re.search(pattern, page_source, flags=re.IGNORECASE):
-            banner_detected = True
-            break
+            banner_matched_on.append(pattern)
+
+    banner_detected = False
+    if(len(banner_matched_on) > 0):
+        banner_detected = True
 
     return (page_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
-            start_ts, end_ts, cookies, banner_detected)
+            start_ts, end_ts, cookies, banner_detected, banner_matched_on)
 
 
 if __name__ == "__main__":

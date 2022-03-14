@@ -165,7 +165,7 @@ def fetch_info(ELEM):
         # selenium page loads...
         (page_source, page_title, resources_ordlist, redirection_chain,
          exception, exception_str, browserstart_ts,
-         browserend_ts, cookies, banner_detected) = download_with_browser(
+         browserend_ts, cookies, banner_detected, banner_matched_on) = download_with_browser(
              URL=uri,
              RUN_HEADLESS=GL_browser_RUN_HEADLESS,
              PAGE_LOAD_TIMEOUT=GL_browser_PAGE_LOAD_TIMEOUT,
@@ -228,7 +228,8 @@ def fetch_info(ELEM):
                 # rdap
                 RDAP_INFOS_DICT=rdap_infos_dict,
                 COOKIES=cookies,
-                BANNER_DETECTED=banner_detected)
+                BANNER_DETECTED=banner_detected,
+                BANNER_MATCHED_ON=banner_matched_on)
         else:
             struct = generate_struct(SOURCE_IP=GL_SOURCE_IP,
                                      URI=uri,
@@ -246,7 +247,8 @@ def fetch_info(ELEM):
                                      # rdap
                                      RDAP_INFOS_DICT=None,
                                      COOKIES=cookies,
-                                     BANNER_DETECTED=banner_detected)
+                                     BANNER_DETECTED=banner_detected,
+                                     BANNER_MATCHED_ON=banner_matched_on)
         append_to_file(struct)
     except Exception as e:
         ts = str(datetime.now()).split(".")[0]
