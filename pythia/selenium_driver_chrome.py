@@ -14,6 +14,7 @@ import traceback
 import re
 from bs4 import BeautifulSoup
 import os
+from deep_translator import GoogleTranslator
 
 USE_BRAVE = False
 
@@ -307,6 +308,9 @@ def download_with_browser(URL,
             start_ts, end_ts, cookies, banner_detected,
             screenshot_path)
 
+# Translate the given word to the given language. The language should be in abbreviation form, e.g 'nl' or 'de'.
+def translate(word, lang):
+    return GoogleTranslator(source='auto', target=lang).translate(word)
 
 def detect_banner_keywords() -> bool:
     patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent',
@@ -316,6 +320,9 @@ def detect_banner_keywords() -> bool:
                 'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information',
                 'Crownpeak (Evidon)',
                 'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
+    dutch_patterns = map(lambda x: translate(x, 'nl'), patterns)
+    patterns.extend(dutch_patterns)
+
     if page_source:
         for pattern in patterns:
             if re.search(pattern, page_source, flags=re.IGNORECASE):
