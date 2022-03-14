@@ -14,3 +14,4 @@ requests
 tldextract
 tqdm
 matplotlib
+deep-translator
