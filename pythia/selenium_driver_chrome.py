@@ -15,7 +15,6 @@ import re
 from bs4 import BeautifulSoup
 import os
 
-
 USE_BRAVE = False
 
 # NOTE: make sure that both binary and driver have the same version.
@@ -23,8 +22,8 @@ CHROME_SERVICE = Service(executable_path=os.path.join(os.path.dirname(os.path.ab
 BRAVE_BIN_PATH = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 
 if ('gl_PATH_CHROMEDRIVER' not in globals()) or \
-   ('gl_PATH_CHROME_BROWSER' not in globals()) or \
-   ('gl_SPOOFED_USER_AGENT' not in globals()):
+        ('gl_PATH_CHROME_BROWSER' not in globals()) or \
+        ('gl_SPOOFED_USER_AGENT' not in globals()):
     gl_PATH_CHROMEDRIVER = "/usr/local/bin/chromedriver"
     gl_PATH_CHROME_BROWSER = "/usr/bin/google-chrome"
     gl_SPOOFED_USER_AGENT = ("Mozilla/5.0 (X11; Linux x86_64) "
@@ -100,7 +99,7 @@ def download_with_browser(URL,
 
         # This excludes Devtools socket logging
         chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        
+
         if USE_BRAVE:
             chrome_options.binary_location = BRAVE_BIN_PATH
 
@@ -161,10 +160,10 @@ def download_with_browser(URL,
         landing_url_reachable = True
         for message in driver_network_log_messages:
             if (message["method"] == "Page.frameNavigated") and \
-               ("params" in message) and \
-               ("frame" in message["params"]) and \
-               ("unreachableUrl" in message["params"]["frame"] and
-                message["params"]["frame"]["unreachableUrl"] == driver.current_url):
+                    ("params" in message) and \
+                    ("frame" in message["params"]) and \
+                    ("unreachableUrl" in message["params"]["frame"] and
+                     message["params"]["frame"]["unreachableUrl"] == driver.current_url):
                 landing_url_reachable = False
         if landing_url_reachable:
             # if there's a minimum waiting treshold, we wait in case
@@ -172,7 +171,7 @@ def download_with_browser(URL,
             if MIN_PAGE_LOAD_TIMEOUT > 0:
                 time.sleep(MIN_PAGE_LOAD_TIMEOUT)
                 driver_network_log_messages += get_new_netlog_msgs(
-                        DRIVER=driver)
+                    DRIVER=driver)
                 PAGE_LOAD_TIMEOUT -= MIN_PAGE_LOAD_TIMEOUT
             tot_slept, s = [0], 0
             while s < PAGE_LOAD_TIMEOUT:
@@ -187,7 +186,7 @@ def download_with_browser(URL,
                     if len(tot_slept) == 1:
                         tot_slept.append(1)
                     else:
-                        tot_slept.append(tot_slept[-1]+tot_slept[-2])
+                        tot_slept.append(tot_slept[-1] + tot_slept[-2])
                         s = sum(tot_slept)
                         if s > PAGE_LOAD_TIMEOUT:
                             tot_slept[-1] -= s - PAGE_LOAD_TIMEOUT
@@ -202,7 +201,7 @@ def download_with_browser(URL,
                 data = message["params"]["response"]
                 resources_ordlist.append((url, data))
             elif (method == "Network.requestWillBeSent") and \
-                 ("redirectResponse" in message["params"]):
+                    ("redirectResponse" in message["params"]):
                 url = message["params"]["redirectResponse"]["url"]
                 data = message["params"]["redirectResponse"]
                 resources_ordlist.append((url, data))
@@ -211,8 +210,8 @@ def download_with_browser(URL,
                 tmp_redirection_chain.append((url_from, url_to))
             elif method == "Page.frameNavigated":
                 if ("params" in message) and \
-                   ("frame" in message["params"]) and \
-                   ("parentId" not in message["params"]["frame"]):
+                        ("frame" in message["params"]) and \
+                        ("parentId" not in message["params"]["frame"]):
                     if "unreachableUrl" in message["params"]["frame"]:
                         url = message["params"]["frame"]["unreachableUrl"]
                     elif "url" in message["params"]["frame"]:
@@ -221,14 +220,14 @@ def download_with_browser(URL,
                         loaded_urls.append(url)
             elif method == "Page.navigatedWithinDocument":
                 if ("params" in message) and \
-                   ("url" in message["params"]):
+                        ("url" in message["params"]):
                     url = message["params"]["url"]
                     if not url.startswith("data:"):
                         loaded_urls.append(url)
             elif method == "Page.frameScheduledNavigation":
                 if ("url" in message["params"]) and \
-                   ("reason" in message["params"]) and \
-                   (message["params"]["reason"] == "metaTagRefresh"):
+                        ("reason" in message["params"]) and \
+                        (message["params"]["reason"] == "metaTagRefresh"):
                     url = message["params"]["url"]
                     loaded_urls.append(url)
         current_url = driver.current_url
@@ -278,8 +277,8 @@ def download_with_browser(URL,
                         if url_to == redirection_chain[0]:
                             redirection_chain.insert(0, url_from)
         if (len(redirection_chain) >= 1) and \
-           (redirection_chain[-1] == current_url) and \
-           landing_url_reachable is True:
+                (redirection_chain[-1] == current_url) and \
+                landing_url_reachable is True:
             # Get the HTML source and the <title>
             page_source = current_source
             page_title = current_title
@@ -300,7 +299,6 @@ def download_with_browser(URL,
             CHROMEDRIVER_LOCK.release()
     end_ts = time.time()
 
-
     # detecting banner
     banner_detected = (detect_banner_keywords() or detect_banner_cookie_libs())
 
@@ -308,6 +306,7 @@ def download_with_browser(URL,
             redirection_chain, exception, exception_str,
             start_ts, end_ts, cookies, banner_detected,
             screenshot_path)
+
 
 def detect_banner_keywords() -> bool:
     patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent',
@@ -323,11 +322,12 @@ def detect_banner_keywords() -> bool:
                 return True
     return False
 
+
 def detect_banner_cookie_libs() -> bool:
     lib_js_file_names = [
-        "https://cc.cdn.civiccomputing.com/9/cookieControl-9.x.min.js", # Civic Cookie Control
-        "https://cc.cdn.civiccomputing.com/9/cookieControl-9.5.min.js",
-        "clickio.mgr.consensu.org/t/consent_225761.js", # Clickio Consent Tool
+        "https://cc\.cdn\.civiccomputing\.com/9/cookieControl-9\.x\.min\.js",  # Civic Cookie Control
+        "https://cc\.cdn\.civiccomputing\.com/9/cookieControl-9\.5\.min\.js",
+        "clickio\.mgr\.consensu\.org/t/consent_225761\.js",  # Clickio Consent Tool
         'window.gdprAppliesGlobally=true;if(!("cmp_id" in window)||window.cmp_id<1){window.cmp_id=0}if(!("cmp_cdid" in window))'
         '{window.cmp_cdid="3834f5ec2941"}if(!("cmp_params" in window)){window.cmp_params=""}if(!("cmp_host" in window))'
         '{window.cmp_host="d.delivery.consentmanager.net"}if(!("cmp_cdn" in window)){window.cmp_cdn="cdn.consentmanager.net"}'
@@ -357,43 +357,49 @@ def detect_banner_cookie_libs() -> bool:
         '{var b=c.__cmapiCall;window.__cmapi(b.command,b.parameter,function(h,g){var e={__cmapiReturn:{returnValue:h,success:g,callId:b.callId}};d.source.postMessage(a?JSON.stringify(e):e,"*")})}if(typeof(c)==="object"&&c!==null&&"__uspapiCall" in c){var b=c.__uspapiCall;window.__uspapi(b.command,b.version,function(h,g){var e={__uspapiReturn:{returnValue:h,success:g,callId:b.callId}}'
         ';d.source.postMessage(a?JSON.stringify(e):e,"*")})}if(typeof(c)==="object"&&c!==null&&"__tcfapiCall" in c){var b=c.__tcfapiCall;window.__tcfapi(b.command,b.version,function(h,g){var e={__tcfapiReturn:{returnValue:h,success:g,callId:b.callId}};d.source.postMessage(a?JSON.stringify(e):e,"*")},b.parameter)}};window.cmp_setStub=function(a){if(!(a in window)||'
         '(typeof(window[a])!=="function"&&typeof(window[a])!=="object"&&(typeof(window[a])==="undefined"||window[a]!==null))){window[a]=window.cmp_stub;window[a].msgHandler=window.cmp_msghandler;window.addEventListener("message",window.cmp_msghandler,false)}};window.cmp_addFrame("__cmapiLocator");window.cmp_addFrame("__cmpLocator");window.cmp_addFrame("__uspapiLocator");'
-        'window.cmp_addFrame("__tcfapiLocator");window.cmp_setStub("__cmapi");window.cmp_setStub("__cmp");window.cmp_setStub("__tcfapi");window.cmp_setStub("__uspapi");', # consentmanager.net
-        'd.delivery.consentmanager.net', # consentmanager.net
-        'https://cdn.consentmanager.net/delivery/autoblocking/3834f5ec2941.js', # consentmanager.net
-        'https://cdn.jsdelivr.net/npm/cookie-bar/cookiebar-latest.min.js', # cookieBAR
-        '<a href=\"#\" onclick=\"document\.cookie=\'cookiebar=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/\'; setupCookieBar\(\); return false;\">Click here to revoke the Cookie consent</a>', # cookieBAR
-        '(https:\/\/|http:\/\/)?consent.cookiebot.com\/.*\.js', #Cookiebot
-        'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css', # Cookie Consent
-        'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js', # Cookie Consent
-        'window.cookieconsent.initialise', # Cookie Consent
-        'https://policy.app.cookieinformation.com/uc.js', # Cookie Information
-        '(https:|http:)?//cdn.cookie-script.com/.*.js', # Cookie Script
-        '', # Crownpeak (Evidon)
-        '', # Didomi
-        '', # jquery.cookieBar
-        '', # jQuery EU Cookie Law popups
-        '', # OneTrust
-        '', # Quantcast Choice
-        '', # TrustArc (TRUSTe)
-        '', # Cookie Bar (WordPress Plugins)
-        '', # Cookie Consent
-        '', # Cookie Law Bar
-        '', # Cookie Notice for GDPR
-        '', # Custom Cookie Message
-        '', # EU Cookie Law
-        '', # GDPR Cookie Compliance
-        '', # GDPR Cookie Consent
-        '', # GDPR Tools
-        '', # WF Cookie Consent
-        '', # Cookie Control (Drupal Modules)
-        '', # EU Cookie Compliance
-        '', # Simple Cookie Compliance
+        'window.cmp_addFrame("__tcfapiLocator");window.cmp_setStub("__cmapi");window.cmp_setStub("__cmp");window.cmp_setStub("__tcfapi");window.cmp_setStub("__uspapi");',
+        # consentmanager.net
+        'd\.delivery\.consentmanager\.net',  # consentmanager.net
+        'https://cdn\.consentmanager\.net/delivery/autoblocking/3834f5ec2941\.js',  # consentmanager.net
+        'https://cdn\.jsdelivr\.net/npm/cookie-bar/cookiebar-latest.min\.js',  # cookieBAR
+        '<a href=\"#\" onclick=\"document\.cookie=\'cookiebar=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/\'; setupCookieBar\(\); return false;\">Click here to revoke the Cookie consent</a>',
+        # cookieBAR
+        '(https:\/\/|http:\/\/)?consent\.cookiebot\.com\/.*\.js',  # Cookiebot
+        '((cdn\.jsdelivr\.net).*|window\.)cookieconsent(\.js|\.css|\.min\.js|\.min\.css|\.initialise)',  # Cookie Consent
+        # 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css', # Cookie Consent
+        # 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js', # Cookie Consent
+        # 'window.cookieconsent.initialise', # Cookie Consent
+        'https://policy\.app\.cookieinformation\.com/uc\.js',  # Cookie Information
+        '(https:|http:)?//cdn.cookie-script.com/.*.js',  # Cookie Script
+        'evidon-banner\.js',  # Crownpeak (Evidon)
+        'evidon.*.js',  # Crownpeak (Evidon)
+        'didomi',  # Didomi
+        '(jquery\.|\.)?cookieBar(\.js|\.css)?',  # jquery.cookieBar
+        'jquery-eu-cookie-law-popup(\.js|\.css)',  # jQuery EU Cookie Law popups
+        'user_cookie_already_accepted|user_cookie_consent_changed',  # jQuery EU Cookie Law popups (events regex)
+        'otBannerSdk(\.js)?|(ot|onetrust)-banner(-sdk)?|(window\.)?OneTrust(\.LoadBanner)?',  # OneTrust
+        'Quantcast|window\._qevents|pixel\.quantserve\.com(\/pixel)?',  # Quantcast Choice
+        'truste-consent-button|truste-consent-required|truste-show-consent|consent\.trustarc\.com',  # TrustArc (TRUSTe)
+        '',  # Cookie Bar (WordPress Plugins)
+        '',  # Cookie Consent
+        '',  # Cookie Law Bar
+        '',  # Cookie Notice for GDPR
+        '',  # Custom Cookie Message
+        '',  # EU Cookie Law
+        '',  # GDPR Cookie Compliance
+        '',  # GDPR Cookie Consent
+        '',  # GDPR Tools
+        '',  # WF Cookie Consent
+        '',  # Cookie Control (Drupal Modules)
+        '',  # EU Cookie Compliance
+        '',  # Simple Cookie Compliance
     ]
     if page_source:
         for pattern in lib_js_file_names:
-            if re.search(pattern, page_source, flags=re.IGNORECASE).:
+            if re.search(pattern, page_source, flags=re.IGNORECASE):
                 return True
     return False
+
 
 if __name__ == "__main__":
 
