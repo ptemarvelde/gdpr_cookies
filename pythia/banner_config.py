@@ -1,4 +1,5 @@
 from deep_translator import GoogleTranslator
+from tqdm import tqdm
 
 lib_js_file_names = [
     "https://cc\.cdn\.civiccomputing\.com/9/cookieControl-9\.x\.min\.js",  # Civic Cookie Control
@@ -95,5 +96,9 @@ def translate(word, lang):
 
 
 for lang in languages:
-    external_patterns = map(lambda x: translate(x, lang), banner_patterns)
-    banner_patterns.extend(external_patterns)
+    print(f"Translating {len(banner_patterns)} phrases to {lang}")
+    external_patterns = []
+    for phrase in tqdm(banner_patterns):
+        external_patterns += [translate(phrase, lang) ]
+    # external_patterns = map(lambda x: )
+banner_patterns.extend(external_patterns)
