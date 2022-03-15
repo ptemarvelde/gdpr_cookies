@@ -22,6 +22,17 @@ USE_BRAVE = False
 CHROME_SERVICE = Service(executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
 BRAVE_BIN_PATH = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 
+patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent',
+            'accept all cookies', 'cookie settings', 'I agree', 'I accept'
+                                                                'OneTrust-Consent', 'Civic Cookie Control',
+            'Clickio Consent Tool',
+            'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information',
+            'Crownpeak (Evidon)',
+            'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
+languages = ["de", "fr", "it", "no", "da", "fi", "es", "pt", "ro", "bg", "et", "el", "ga", "hr", "lv", "lt", "mt",
+             "nl", "pl", "sv",
+             "sk", "sl", "cs", "hu", "ru", "sr", "zh", "tr", "uk", "ar", "bs"]
+
 if ('gl_PATH_CHROMEDRIVER' not in globals()) or \
         ('gl_PATH_CHROME_BROWSER' not in globals()) or \
         ('gl_SPOOFED_USER_AGENT' not in globals()):
@@ -315,16 +326,6 @@ def translate(word, lang):
 
 
 def detect_banner_keywords() -> bool:
-    patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent',
-                'accept all cookies', 'cookie settings', 'I agree', 'I accept'
-                                                                    'OneTrust-Consent', 'Civic Cookie Control',
-                'Clickio Consent Tool',
-                'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information',
-                'Crownpeak (Evidon)',
-                'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
-    languages = ["de", "fr", "it", "no", "da", "fi", "es", "pt", "ro", "bg", "et", "el", "ga", "hr", "lv", "lt", "mt",
-                 "nl", "pl", "sv",
-                 "sk", "sl", "cs", "hu", "ru", "sr", "zh", "tr", "uk", "ar", "bs"]
     for lang in languages:
         external_patterns = map(lambda x: translate(x, lang), patterns)
         patterns.extend(external_patterns)
