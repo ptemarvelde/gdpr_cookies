@@ -308,9 +308,11 @@ def download_with_browser(URL,
             start_ts, end_ts, cookies, banner_detected,
             screenshot_path)
 
+
 # Translate the given word to the given language. The language should be in abbreviation form, e.g 'nl' or 'de'.
 def translate(word, lang):
     return GoogleTranslator(source='auto', target=lang).translate(word)
+
 
 def detect_banner_keywords() -> bool:
     patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent',
@@ -320,8 +322,14 @@ def detect_banner_keywords() -> bool:
                 'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information',
                 'Crownpeak (Evidon)',
                 'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
-    dutch_patterns = map(lambda x: translate(x, 'nl'), patterns)
-    patterns.extend(dutch_patterns)
+    languages = ["de", "fr", "it", "no", "da", "fi", "es", "pt", "ro", "bg", "et", "el", "ga", "hr", "lv", "lt", "mt",
+                 "nl", "pl", "sv",
+                 "sk", "sl", "cs", "hu", "ru", "sr", "zh", "tr", "uk", "ar", "bs"]
+    for lang in languages:
+        external_patterns = map(lambda x: translate(x, lang), patterns)
+        patterns.extend(external_patterns)
+    # dutch_patterns = map(lambda x: translate(x, 'nl'), patterns)
+    # patterns.extend(dutch_patterns)
 
     if page_source:
         for pattern in patterns:
@@ -372,7 +380,8 @@ def detect_banner_cookie_libs() -> bool:
         '<a href=\"#\" onclick=\"document\.cookie=\'cookiebar=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/\'; setupCookieBar\(\); return false;\">Click here to revoke the Cookie consent</a>',
         # cookieBAR
         '(https:\/\/|http:\/\/)?consent\.cookiebot\.com\/.*\.js',  # Cookiebot
-        '((cdn\.jsdelivr\.net).*|window\.)cookieconsent(\.js|\.css|\.min\.js|\.min\.css|\.initialise)',  # Cookie Consent
+        '((cdn\.jsdelivr\.net).*|window\.)cookieconsent(\.js|\.css|\.min\.js|\.min\.css|\.initialise)',
+        # Cookie Consent
         # 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css', # Cookie Consent
         # 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js', # Cookie Consent
         # 'window.cookieconsent.initialise', # Cookie Consent
