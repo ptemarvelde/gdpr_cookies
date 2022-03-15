@@ -51,6 +51,7 @@ GL_URI_FILE = "../resources/data/20220308-173703/dutch_top_50"
 GL_MAX_DOMAINS_TO_CONTACT = 1000000
 GL_SHUFFLE_DOMAINS_LIST = True
 
+
 def load_domains_list(FNAME, LIMIT=1000000, SHUFFLE=True):
     rankdomains_list = []
     fid_input = open(FNAME, 'r')
@@ -80,7 +81,9 @@ def load_domains_list(FNAME, LIMIT=1000000, SHUFFLE=True):
 def expand_with_protocols(RANKDOMAINS_LIST):
     rankuri_list = []
     for rank, domain in RANKDOMAINS_LIST:
-        for proto in ["http://", "http://www.", "https://", "https://www."]:
+        # Only use https://www, difference in cookies/banners for different protocols is minimal.
+        # for proto in ["http://", "http://www.", "https://", "https://www."]:
+        for proto in ["https://www."]:
             uri = "%s%s" % (proto, domain)
             # check that the uri is not in the list of those that were
             # already processed
@@ -113,7 +116,7 @@ def url_to_domain(URL):
 
 def append_to_file(STRUCT):
     GL_OUTPUT_LOCK.acquire()
-    GL_OUTPUT_FID.write(json.dumps(STRUCT)+"\n")
+    GL_OUTPUT_FID.write(json.dumps(STRUCT) + "\n")
     GL_OUTPUT_FID.flush()
     GL_OUTPUT_LOCK.release()
 
@@ -128,11 +131,11 @@ def log_exception(EXCEPTION_STR,
                   EXCEPTION_LOG_FILE,
                   EXCEPTION_LOG_FID=None):
     if EXCEPTION_LOG_FID is not None:
-        EXCEPTION_LOG_FID.write(EXCEPTION_STR+"\n\n")
+        EXCEPTION_LOG_FID.write(EXCEPTION_STR + "\n\n")
         EXCEPTION_LOG_FID.flush()
     else:
         fid = open(EXCEPTION_LOG_FILE, 'a')
-        fid.write(EXCEPTION_STR+"\n")
+        fid.write(EXCEPTION_STR + "\n")
         fid.close()
 
 
@@ -167,11 +170,11 @@ def fetch_info(ELEM):
         # selenium page loads...
         (page_source, page_title, resources_ordlist, redirection_chain,
          exception, exception_str, browserstart_ts,
-         browserend_ts, cookies, banner_detected, banner_matched_on, screenshot_file) = download_with_browser(
-             URL=uri,
-             RUN_HEADLESS=GL_browser_RUN_HEADLESS,
-             PAGE_LOAD_TIMEOUT=GL_browser_PAGE_LOAD_TIMEOUT,
-             CHROMEDRIVER_LOCK=GL_CHROMEDRIVER_LOCK)
+         browserend_ts, cookies, banner, screenshot_file) = download_with_browser(
+            URL=uri,
+            RUN_HEADLESS=GL_browser_RUN_HEADLESS,
+            PAGE_LOAD_TIMEOUT=GL_browser_PAGE_LOAD_TIMEOUT,
+            CHROMEDRIVER_LOCK=GL_CHROMEDRIVER_LOCK)
 
         if (exception is None) and (len(resources_ordlist) >= 1):
             # generate a list of unique URLs
@@ -199,8 +202,8 @@ def fetch_info(ELEM):
             # generate a list of unique IPs
             unique_ips = set([dnsresolutions[-1][1]
                               for dnsresolutions, dnsexception,
-                              dnsexception_str,
-                              dnsstart_ts, dnsend_ts
+                                  dnsexception_str,
+                                  dnsstart_ts, dnsend_ts
                               in unique_domains_resolutions.values()
                               # if the resolution was successful
                               if dnsexception is None and
@@ -230,10 +233,9 @@ def fetch_info(ELEM):
                 # rdap
                 RDAP_INFOS_DICT=rdap_infos_dict,
                 COOKIES=cookies,
-                BANNER_DETECTED=banner_detected,
-                BANNER_MATCHED_ON=banner_matched_on,
+                BANNER=banner,
                 SCREENSHOT_FILE=screenshot_file
-                )
+            )
         else:
             struct = generate_struct(SOURCE_IP=GL_SOURCE_IP,
                                      URI=uri,
@@ -251,8 +253,7 @@ def fetch_info(ELEM):
                                      # rdap
                                      RDAP_INFOS_DICT=None,
                                      COOKIES=cookies,
-                                     BANNER_DETECTED=banner_detected,
-                                     BANNER_MATCHED_ON=banner_matched_on,
+                                     BANNER=banner,
                                      SCREENSHOT_FILE=screenshot_file)
 
         append_to_file(struct)
@@ -280,12 +281,12 @@ def main():
     # process in chunks
     for i in tqdm(range(0, len(rankuri_list), GL_CRAWL_CHUNK_SIZE)):
         p = multiprocessing.Pool(GL_MAX_NUM_CHROMEDRIVER_INSTANCES)
-        chunk = rankuri_list[i: i+GL_CRAWL_CHUNK_SIZE]
+        chunk = rankuri_list[i: i + GL_CRAWL_CHUNK_SIZE]
         p.map(fetch_info, chunk)
         p.close()
         p.join()
         lock_print(("%s process completed crawling %s domains. "
-                   "Sleeping %s seconds") % (
+                    "Sleeping %s seconds") % (
                        GL_MAX_NUM_CHROMEDRIVER_INSTANCES,
                        GL_CRAWL_CHUNK_SIZE,
                        GL_CRAWL_CHUNK_SLEEP))
@@ -297,5 +298,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
