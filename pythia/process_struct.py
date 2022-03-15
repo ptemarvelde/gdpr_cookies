@@ -15,6 +15,7 @@ def generate_struct(SOURCE_IP,
                     RDAP_INFOS_DICT,
                     COOKIES,
                     BANNER_DETECTED,
+                    BANNER_MATCHED_ON,
                     SCREENSHOT_FILE):
     browser_module = {
         "uri": URI,
@@ -28,6 +29,7 @@ def generate_struct(SOURCE_IP,
         "end_ts": BROWSEREND_TS,
         "cookies": COOKIES,
         "banner_detected": BANNER_DETECTED,
+        "banner_matched_on": BANNER_MATCHED_ON,
         "screenshot_file": SCREENSHOT_FILE
     }
     if UNIQUE_DOMAINS_RESOLUTIONS is not None:

@@ -22,16 +22,22 @@ USE_BRAVE = False
 CHROME_SERVICE = Service(executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
 BRAVE_BIN_PATH = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 
-patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent',
-            'accept all cookies', 'cookie settings', 'I agree', 'I accept'
-                                                                'OneTrust-Consent', 'Civic Cookie Control',
-            'Clickio Consent Tool',
+patterns = ['gebruik van.*cookies', 'accept.*cookie', 'decline cookie', 'reject cookie', 'reject all cookies',
+            'cookie consent', 'accept all cookies', 'cookie settings', 'I agree', 'I accept',
+            'allow all cookies', 'use of cookies',
+            'Ik ga akkoord', 'cookies accepteren', 'cookievoorkeuren', 'noodzakelijke cookies', 'functionele cookies',
+            'alles accepteren', 'accept all',
+            'alle cookies accepteren', 'cookie instellingen',
+            'OneTrust-Consent', 'Civic Cookie Control', 'Clickio Consent Tool',
             'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information',
             'Crownpeak (Evidon)',
             'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
-languages = ["de", "fr", "it", "no", "da", "fi", "es", "pt", "ro", "bg", "et", "el", "ga", "hr", "lv", "lt", "mt",
-             "nl", "pl", "sv",
-             "sk", "sl", "cs", "hu", "ru", "sr", "zh", "tr", "uk", "ar", "bs"]
+
+languages = ["fr", "es", "hi"]
+
+# languages = ["de", "fr", "it", "no", "da", "fi", "es", "pt", "ro", "bg", "et", "el", "ga", "hr", "lv", "lt", "mt",
+#              "nl", "pl", "sv",
+#              "sk", "sl", "cs", "hu", "ru", "sr", "zh", "tr", "uk", "ar", "bs"]
 
 if ('gl_PATH_CHROMEDRIVER' not in globals()) or \
         ('gl_PATH_CHROME_BROWSER' not in globals()) or \
@@ -312,20 +318,22 @@ def download_with_browser(URL,
     end_ts = time.time()
 
     # detecting banner
-    banner_detected = (detect_banner_keywords() or detect_banner_cookie_libs())
+
+    banner_matched_on = detect_banner_keywords()
+    banner_detected = False
+    if len(banner_matched_on) > 0 or detect_banner_cookie_libs():
+        banner_detected = True
+
 
     return (page_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
-            start_ts, end_ts, cookies, banner_detected,
-            screenshot_path)
-
+            start_ts, end_ts, cookies, banner_detected, banner_matched_on, screenshot_path)
 
 # Translate the given word to the given language. The language should be in abbreviation form, e.g 'nl' or 'de'.
 def translate(word, lang):
     return GoogleTranslator(source='auto', target=lang).translate(word)
 
-
-def detect_banner_keywords() -> bool:
+def detect_banner_keywords() -> list:
     for lang in languages:
         external_patterns = map(lambda x: translate(x, lang), patterns)
         patterns.extend(external_patterns)
@@ -336,7 +344,13 @@ def detect_banner_keywords() -> bool:
         for pattern in patterns:
             if re.search(pattern, page_source, flags=re.IGNORECASE):
                 return True
-    return False
+
+    banner_matched_keywords = []
+    for pattern in patterns:
+        if re.search(pattern, page_source, flags=re.IGNORECASE):
+            banner_matched_keywords.append(pattern)
+
+    return banner_matched_keywords
 
 
 def detect_banner_cookie_libs() -> bool:
@@ -411,11 +425,13 @@ def detect_banner_cookie_libs() -> bool:
         '',  # EU Cookie Compliance
         '',  # Simple Cookie Compliance
     ]
+
     if page_source:
         for pattern in lib_js_file_names:
-            if re.search(pattern, page_source, flags=re.IGNORECASE):
+            if pattern != "" and re.search(pattern, page_source, flags=re.IGNORECASE):
                 return True
     return False
+
 
 
 if __name__ == "__main__":
