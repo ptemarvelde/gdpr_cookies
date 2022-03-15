@@ -12,12 +12,13 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-from pythia.samples.banner_config import lib_js_file_names, banner_patterns
+from banner_config import lib_js_file_names, banner_patterns
 
 USE_BRAVE = False
 
 # NOTE: make sure that both binary and driver have the same version.
-CHROME_SERVICE = Service(executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
+# CHROME_SERVICE = Service(executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
+CHROME_SERVICE = "/usr/bin/google-chrome"
 BRAVE_BIN_PATH = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 
 if ('gl_PATH_CHROMEDRIVER' not in globals()) or \
@@ -343,33 +344,32 @@ def detect_banner_cookie_libs(page_source) -> list:
 
 
 if __name__ == "__main__":
-    pass
-    # # Example: HTTPS with Chromium in headless mode
-    # url = "https://bitbucket.org/"
-    # (page_source, page_title, resources_ordlist, redirection_chain,
-    #  exception, exception_str, browserstart_ts,
-    #  browserend_ts, cookies) = download_with_browser(url)
-    # print("Start URL: %s" % (url))
-    # if exception is None:
-    #     print("redirection_chain: %s" % (" => ".join([
-    #         el for el in redirection_chain])))
-    #     print()
-    #     print(resources_ordlist[0])
-    #     for (url, data) in resources_ordlist:
-    #         print("URL: %s\n" % (url))
-    #         if "requestHeaders" in data:
-    #             print("REQUEST HEADERS:")
-    #             for k, v in data["requestHeaders"].items():
-    #                 if not k.startswith(":"):
-    #                     print("-> %s: %s" % (k, v))
-    #         if "headers" in data:
-    #             print("RESPONSE HEADERS:")
-    #             for k, v in data["headers"].items():
-    #                 print("<- %s: %s" % (k, v))
-    #         print()
-    # else:
-    #     print("Exception: %s" % (exception))
-    #     print()
-    # print("cookies:", json.dumps(cookies, indent=4))
-    # print("Time spent: %4.2f seconds" % (browserend_ts - browserstart_ts))
-    # print()
+    # Example: HTTPS with Chromium in headless mode
+    url = "https://bitbucket.org/"
+    (page_source, page_title, resources_ordlist, redirection_chain,
+     exception, exception_str, browserstart_ts,
+     browserend_ts, cookies) = download_with_browser(url)
+    print("Start URL: %s" % (url))
+    if exception is None:
+        print("redirection_chain: %s" % (" => ".join([
+            el for el in redirection_chain])))
+        print()
+        print(resources_ordlist[0])
+        for (url, data) in resources_ordlist:
+            print("URL: %s\n" % (url))
+            if "requestHeaders" in data:
+                print("REQUEST HEADERS:")
+                for k, v in data["requestHeaders"].items():
+                    if not k.startswith(":"):
+                        print("-> %s: %s" % (k, v))
+            if "headers" in data:
+                print("RESPONSE HEADERS:")
+                for k, v in data["headers"].items():
+                    print("<- %s: %s" % (k, v))
+            print()
+    else:
+        print("Exception: %s" % (exception))
+        print()
+    print("cookies:", json.dumps(cookies, indent=4))
+    print("Time spent: %4.2f seconds" % (browserend_ts - browserstart_ts))
+    print()
