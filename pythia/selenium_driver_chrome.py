@@ -285,8 +285,10 @@ def download_with_browser(URL,
 
 
     # detecting banner
-    patterns = ['accept cookie', 'decline cookie', 'reject cookie', 'reject all cookie', 'cookie consent', 'accept all cookies', 'cookie settings', 'I agree', 'I accept',
-                'Ik ga akkoord', 'cookies accepteren', 'gebruik van cookies', 'cookievoorkeuren',
+    patterns = ['gebruik van.*cookies','accept.*cookie', 'decline cookie', 'reject cookie', 'reject all cookies', 'cookie consent', 'accept all cookies', 'cookie settings', 'I agree', 'I accept',
+                'allow all cookies',
+                'Ik ga akkoord', 'cookies accepteren', 'cookievoorkeuren', 'noodzakelijke cookies', 'functionele cookies', 'alles accepteren', 'accept all',
+                'alle cookies accepteren', 'cookie instellingen', 
                 'OneTrust-Consent', 'Civic Cookie Control', 'Clickio Consent Tool',
                 'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information', 'Crownpeak (Evidon)',
                 'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice', 'TrustArc']
