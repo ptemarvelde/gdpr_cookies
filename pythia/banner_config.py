@@ -11,10 +11,10 @@ lib_js_file_names = [
     'window.cmp_getsupportedLangs=function(){var b=["DE","EN","FR","IT","NO","DA","FI","ES","PT","RO","BG","ET",'
     '"EL","GA","HR","LV","LT","MT","NL","PL","SV","SK","SL","CS","HU","RU","SR","ZH","TR","UK","AR","BS"]; '
     'if("cmp_customlanguages" in window){for(var a=0;a<window.cmp_customlanguages.length;a++)'
-    '{b.push(window.cmp_customlanguages[a].l.toUpperCase())}}return b};window.cmp_getRTLLangs=function()'
+    "{b.push(window.cmp_customlanguages[a].l.toUpperCase())}}return b};window.cmp_getRTLLangs=function()"
     '{return["AR"]};window.cmp_getlang=function(j){if(typeof(j)!="boolean"){j=true}'
     'if(j&&typeof(cmp_getlang.usedlang)=="string"&&cmp_getlang.usedlang!=="")'
-    '{return cmp_getlang.usedlang}var g=window.cmp_getsupportedLangs();var c=[];'
+    "{return cmp_getlang.usedlang}var g=window.cmp_getsupportedLangs();var c=[];"
     'var f=location.hash;var e=location.search;var a="languages" in navigator?navigator.languages:[];if(f.indexOf("cmplang=")!=-1){c.push(f.substr(f.indexOf("cmplang=")+8,2).toUpperCase())}else{if(e.indexOf("cmplang=")!=-1)'
     '{c.push(e.substr(e.indexOf("cmplang=")+8,2).toUpperCase())}else{if("cmp_setlang" in window&&window.cmp_setlang!=""){c.push(window.cmp_setlang.toUpperCase())}else{if(a.length>0){for(var d=0;d<a.length;d++){c.push(a[d])}}}}}'
     'if("language" in navigator){c.push(navigator.language)}if("userLanguage" in navigator){c.push(navigator.userLanguage)}var h="";for(var d=0;d<c.length;d++){var b=c[d].toUpperCase();if(g.indexOf(b)!=-1){h=b;break}if(b.indexOf("-")!=-1){b=b.substr(0,2)}if(g.indexOf(b)!=-1){h=b;break}}'
@@ -36,62 +36,88 @@ lib_js_file_names = [
     '(typeof(window[a])!=="function"&&typeof(window[a])!=="object"&&(typeof(window[a])==="undefined"||window[a]!==null))){window[a]=window.cmp_stub;window[a].msgHandler=window.cmp_msghandler;window.addEventListener("message",window.cmp_msghandler,false)}};window.cmp_addFrame("__cmapiLocator");window.cmp_addFrame("__cmpLocator");window.cmp_addFrame("__uspapiLocator");'
     'window.cmp_addFrame("__tcfapiLocator");window.cmp_setStub("__cmapi");window.cmp_setStub("__cmp");window.cmp_setStub("__tcfapi");window.cmp_setStub("__uspapi");',
     # consentmanager.net
-    'd\.delivery\.consentmanager\.net',  # consentmanager.net
-    'https://cdn\.consentmanager\.net/delivery/autoblocking/3834f5ec2941\.js',  # consentmanager.net
-    'https://cdn\.jsdelivr\.net/npm/cookie-bar/cookiebar-latest.min\.js',  # cookieBAR
-    '<a href=\"#\" onclick=\"document\.cookie=\'cookiebar=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/\'; setupCookieBar\(\); return false;\">Click here to revoke the Cookie consent</a>',
+    "d\.delivery\.consentmanager\.net",  # consentmanager.net
+    "https://cdn\.consentmanager\.net/delivery/autoblocking/3834f5ec2941\.js",  # consentmanager.net
+    "https://cdn\.jsdelivr\.net/npm/cookie-bar/cookiebar-latest.min\.js",  # cookieBAR
+    '<a href="#" onclick="document\.cookie=\'cookiebar=;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/\'; setupCookieBar\(\); return false;">Click here to revoke the Cookie consent</a>',
     # cookieBAR
-    '(https:\/\/|http:\/\/)?consent\.cookiebot\.com\/.*\.js',  # Cookiebot
-    '((cdn\.jsdelivr\.net).*|window\.)cookieconsent(\.js|\.css|\.min\.js|\.min\.css|\.initialise)',
+    "(https:\/\/|http:\/\/)?consent\.cookiebot\.com\/.*\.js",  # Cookiebot
+    "((cdn\.jsdelivr\.net).*|window\.)cookieconsent(\.js|\.css|\.min\.js|\.min\.css|\.initialise)",
     # Cookie Consent
     # 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css', # Cookie Consent
     # 'https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js', # Cookie Consent
     # 'window.cookieconsent.initialise', # Cookie Consent
-    'https://policy\.app\.cookieinformation\.com/uc\.js',  # Cookie Information
-    '(https:|http:)?//cdn.cookie-script.com/.*.js',  # Cookie Script
-    'evidon-banner\.js',  # Crownpeak (Evidon)
-    'evidon.*.js',  # Crownpeak (Evidon)
-    'didomi',  # Didomi
-    '(jquery\.|\.)?cookieBar(\.js|\.css)?',  # jquery.cookieBar
-    'jquery-eu-cookie-law-popup(\.js|\.css)',  # jQuery EU Cookie Law popups
-    'user_cookie_already_accepted|user_cookie_consent_changed',  # jQuery EU Cookie Law popups (events regex)
-    'otBannerSdk(\.js)?|(ot|onetrust)-banner(-sdk)?|(window\.)?OneTrust(\.LoadBanner)?',  # OneTrust
-    'Quantcast|window\._qevents|pixel\.quantserve\.com(\/pixel)?',  # Quantcast Choice
-    'truste-consent-button|truste-consent-required|truste-show-consent|consent\.trustarc\.com',  # TrustArc (TRUSTe)
-    '',  # Cookie Bar (WordPress Plugins)
-    '',  # Cookie Consent
-    '',  # Cookie Law Bar
-    '',  # Cookie Notice for GDPR
-    '',  # Custom Cookie Message
-    '',  # EU Cookie Law
-    '',  # GDPR Cookie Compliance
-    '',  # GDPR Cookie Consent
-    '',  # GDPR Tools
-    '',  # WF Cookie Consent
-    '',  # Cookie Control (Drupal Modules)
-    '',  # EU Cookie Compliance
-    '',  # Simple Cookie Compliance
+    "https://policy\.app\.cookieinformation\.com/uc\.js",  # Cookie Information
+    "(https:|http:)?//cdn.cookie-script.com/.*.js",  # Cookie Script
+    "(jquery\.|\.)?cookieBar(\.js|\.css)?",  # jquery.cookieBar
+    "jquery-eu-cookie-law-popup(\.js|\.css)",  # jQuery EU Cookie Law popups
+    "user_cookie_already_accepted|user_cookie_consent_changed",  # jQuery EU Cookie Law popups (events regex)
+    "otBannerSdk(\.js)?|(ot|onetrust)-banner(-sdk)?|(window\.)?OneTrust(\.LoadBanner)?",  # OneTrust
+    "Quantcast|window\._qevents|pixel\.quantserve\.com(\/pixel)?",  # Quantcast Choice
+    "truste-consent-button|truste-consent-required|truste-show-consent|consent\.trustarc\.com",  # TrustArc (TRUSTe)
+    "cookie(-|_)bar(-js|-css|\.css|\.js)|cookie_bar_message|cookie_bar_button|cookie_bar_btn_bg_colour",  # Cookie Bar (WordPress Plugins)
+    "",  # Cookie Consent (TODO:)
+    "cookie-law-bar-setting|cookie-law-bar(\.js|-js|-css|\.css)",  # Cookie Law Bar
+    "settings_page_cookie-notice|cookie-notice-admin|cookie-notice-front|cookie_notice_options|cookie_notice_version|cookie_notice_accepted|cn_is_cookie_accepted|reset_cookie_notice_options|cookie-notice",  # Cookie Notice for GDPR
+    "custom(-|_)cookie(-|_)message(-popup\.css|-popup-styles|-popup\.js)?|custom-cookie-message-popup\.js|custom-cookie-message-popup\.css|custom-cookie-message-popup-styles",  # Custom Cookie Message
+    'eu_cookie_law_frontend_popup|eu_cookie_law_frontend_banner|eucookielaw-scripts|class="eucookie"|eu-cookie-law|<div class="pea_cook_more_info_popover"><div class="pea_cook_more_info_popover_inner"',  # EU Cookie Law
+    '<span role="link" tabindex="0" data-href="#moove_gdpr_cookie_modal" class="change-settings-button">|moove-gdpr-info-bar-hidden|moove-gdpr-align-center|gdpr-cookie-compliance',  # GDPR Cookie Compliance
+    "",  # GDPR Cookie Consent (TODO:)
+    "options-general\.php?page=gdpr-tools-setting|jquery\.eu-cookie-consent\.js|gdpr-tools-public\.js|gdpr-tools-public\.css|gdpr-tools-data-settings|gdpr-confirm-wrapper",  # GDPR Tools
+    "",  # WF Cookie Consent (TODO:)
+    "",  # Cookie Control (Drupal Modules) (TODO:)
+    "",  # EU Cookie Compliance (TODO:)
+    "",  # Simple Cookie Compliance (TODO:)
+    "evidon-banner\.js",  # Crownpeak (Evidon)
+    "evidon.*.js",  # Crownpeak (Evidon)
+    "didomi",  # Didomi
 ]
 
-banner_patterns = ['gebruik van.*cookies', 'accept.*cookie', 'decline cookie', 'reject cookie', 'reject all cookies',
-                   'cookie consent', 'accept all cookies', 'cookie settings', 'I agree', 'I accept',
-                   'allow all cookies', 'use of cookies',
-                   'Ik ga akkoord', 'cookies accepteren', 'cookievoorkeuren', 'noodzakelijke cookies',
-                   'functionele cookies',
-                   'alles accepteren', 'accept all',
-                   'alle cookies accepteren', 'cookie instellingen',
-                   'OneTrust-Consent', 'Civic Cookie Control', 'Clickio Consent Tool',
-                   'consentmanager.net', 'cookieBAR', 'Cookiebot', 'Cookie Consent', 'Cookie Information',
-                   'Crownpeak (Evidon)',
-                   'Didomi', 'jquery.cookieBar', 'jQuery EU Cookie Law popups', 'OneTrust', 'Quantcast Choice',
-                   'TrustArc']
+banner_patterns = [
+    "gebruik van.*cookies",
+    "accept.*cookie",
+    "decline cookie",
+    "reject cookie",
+    "reject all cookies",
+    "cookie consent",
+    "accept all cookies",
+    "cookie settings",
+    "I agree",
+    "I accept",
+    "allow all cookies",
+    "use of cookies",
+    "Ik ga akkoord",
+    "cookies accepteren",
+    "cookievoorkeuren",
+    "noodzakelijke cookies",
+    "functionele cookies",
+    "alles accepteren",
+    "accept all",
+    "alle cookies accepteren",
+    "cookie instellingen",
+    "OneTrust-Consent",
+    "Civic Cookie Control",
+    "Clickio Consent Tool",
+    "consentmanager.net",
+    "cookieBAR",
+    "Cookiebot",
+    "Cookie Consent",
+    "Cookie Information",
+    "Crownpeak (Evidon)",
+    "Didomi",
+    "jquery.cookieBar",
+    "jQuery EU Cookie Law popups",
+    "OneTrust",
+    "Quantcast Choice",
+    "TrustArc",
+]
 
 languages = ["fr", "es", "hi"]
 
 
 # Translate the given word to the given language. The language should be in abbreviation form, e.g 'nl' or 'de'.
 def translate(word, lang):
-    return GoogleTranslator(source='auto', target=lang).translate(word)
+    return GoogleTranslator(source="auto", target=lang).translate(word)
 
 
 for lang in languages:
