@@ -96,9 +96,10 @@ def translate(word, lang):
 
 
 for lang in languages:
+    # continue
     print(f"Translating {len(banner_patterns)} phrases to {lang}")
     external_patterns = []
     for phrase in tqdm(banner_patterns):
         external_patterns += [translate(phrase, lang) ]
     # external_patterns = map(lambda x: )
-banner_patterns.extend(external_patterns)
+    banner_patterns.extend(external_patterns)

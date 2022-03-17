@@ -24,7 +24,7 @@ GL_SOURCE_IP = str(json.loads(requests.get('http://jsonip.com').text)["ip"])
 # stdout
 GL_STDOUT_LOCK = multiprocessing.Lock()
 # json output file
-GL_OUTPUT_DIR = Path("../resources/dutch_run_1/")
+GL_OUTPUT_DIR = Path("../resources/test_docker7/")
 GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
 GL_OUTPUT_FILE = GL_OUTPUT_DIR / "results.jsonl"
 GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / "screenshots"
@@ -40,13 +40,13 @@ GL_EXCEPTION_LOCK = multiprocessing.Lock()
 GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
 
 # parallel browser instances
-GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 10
+GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 1
 # chunks size to be processed in batch
 GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
 GL_CRAWL_CHUNK_SLEEP = 30
 
-GL_URI_FILE = "../resources/data/20220308-173703/dutch_top_50"
+GL_URI_FILE = "../resources/testdomains.txt"
 # GL_URI_FILE = "../util/data/dutch_top_50"
 GL_MAX_DOMAINS_TO_CONTACT = 1000000
 GL_SHUFFLE_DOMAINS_LIST = True
@@ -75,6 +75,7 @@ def load_domains_list(FNAME, LIMIT=1000000, SHUFFLE=True):
     fid_input.close()
     if SHUFFLE is True:
         random.shuffle(rankdomains_list)
+    print(f"querying domains: {rankdomains_list}")
     return rankdomains_list
 
 

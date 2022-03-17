@@ -6,30 +6,84 @@ import re
 import time as time
 import traceback
 from datetime import datetime
-
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from banner_config import lib_js_file_names, banner_patterns
 
 USE_BRAVE = False
+LOCAL_RUN = os.environ.get("LOCAL_RUN", "False") == "True"
+# LOCAL_RUN = os.environ.get("LOCAL_RUN", "False") == "True"
+
 
 # NOTE: make sure that both binary and driver have the same version.
-# CHROME_SERVICE = Service(executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
-CHROME_SERVICE = "/usr/bin/google-chrome"
+CHROME_SERVICE = None if not LOCAL_RUN else Service(executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
 BRAVE_BIN_PATH = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 
 if ('gl_PATH_CHROMEDRIVER' not in globals()) or \
         ('gl_PATH_CHROME_BROWSER' not in globals()) or \
         ('gl_SPOOFED_USER_AGENT' not in globals()):
     gl_PATH_CHROMEDRIVER = "/usr/local/bin/chromedriver"
-    gl_PATH_CHROME_BROWSER = "/usr/bin/google-chrome"
+    gl_PATH_CHROME_BROWSER = "/usr/bin/google-chrome-stable"
     gl_SPOOFED_USER_AGENT = ("Mozilla/5.0 (X11; Linux x86_64) "
                              "AppleWebKit/537.36 "
                              "(KHTML, like Gecko) Chrome/70.0.3538.77 "
                              "Safari/537.36")
+
+
+def create_driver(run_headless=True, chromedriver_lock=None):
+    # Options used when launching Chrome
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--disable-extensions')
+    chrome_options.add_argument("--ignore-certificate-errors")
+    chrome_options.add_argument("--incognito")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-xss-auditor")
+    chrome_options.add_argument("--disable-background-networking")
+    chrome_options.add_argument("--mute-audio")
+    # notifications
+    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument("--disable-file-system")
+    chrome_options.add_argument("--allow-running-insecure-content")
+    chrome_options.add_argument("--window-size=1980,960")
+    chrome_options.add_argument("--no-sandbox")
+    # This excludes Devtools socket logging
+    # chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    #
+    if run_headless is True:
+        chrome_options.add_argument("--headless")
+    if gl_SPOOFED_USER_AGENT:
+        chrome_options.add_argument("--user-agent=%s" %
+                                    gl_SPOOFED_USER_AGENT)
+    # #
+    caps = DesiredCapabilities.CHROME
+    caps["binary_location"] = gl_PATH_CHROME_BROWSER
+    # Needed for non-trusted HTTPS certificates (with 'headless'
+    # mode chromedriver will ignore the other options!)
+    ## ISSUE https://bugs.chromium.org/p/chromedriver/issues/detail?id=1925
+    caps['acceptInsecureCerts'] = True
+    # Options for instructing the browser to log the network
+    # traffic visible to the user
+    caps['goog:loggingPrefs'] = {
+        "browser": "ALL",
+        "driver": "ALL",
+        "performance": "ALL"}
+    #
+    if chromedriver_lock is not None:
+        chromedriver_lock.acquire()
+
+    kwargs = {
+        "desired_capabilities": caps,
+        "options": chrome_options,
+    }
+
+    if LOCAL_RUN:
+        kwargs['service'] = CHROME_SERVICE
+
+    return webdriver.Chrome(**kwargs)
 
 
 def download_with_browser(URL,
@@ -37,7 +91,7 @@ def download_with_browser(URL,
                           MIN_PAGE_LOAD_TIMEOUT=4,
                           PAGE_LOAD_TIMEOUT=60,
                           CHROMEDRIVER_LOCK=None):
-    from pythia.task_manager import GL_SCREENSHOT_DIR
+    from task_manager import GL_SCREENSHOT_DIR
 
     def get_new_netlog_msgs(DRIVER):
         try:
@@ -85,52 +139,7 @@ def download_with_browser(URL,
     banner_detected = False
     screenshot_path = ""
     try:
-        # Options used when launching Chrome
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('disable-extensions')
-        chrome_options.add_argument("ignore-certificate-errors")
-        chrome_options.add_argument("incognito")
-        chrome_options.add_argument("disable-gpu")
-        chrome_options.add_argument("disable-xss-auditor")
-        chrome_options.add_argument("disable-background-networking")
-        chrome_options.add_argument("mute-audio")
-        # notifications
-        chrome_options.add_argument("disable-notifications")
-        chrome_options.add_argument("disable-file-system")
-        chrome_options.add_argument("allow-running-insecure-content")
-        chrome_options.add_argument("window-size=1980,960")
-
-        # This excludes Devtools socket logging
-        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-
-        if USE_BRAVE:
-            chrome_options.binary_location = BRAVE_BIN_PATH
-
-        if RUN_HEADLESS is True:
-            chrome_options.add_argument("headless")
-        if gl_SPOOFED_USER_AGENT:
-            chrome_options.add_argument("--user-agent=%s" %
-                                        gl_SPOOFED_USER_AGENT)
-
-        caps = DesiredCapabilities.CHROME
-        caps["binary_location"] = gl_PATH_CHROME_BROWSER
-        # Needed for non-trusted HTTPS certificates (with 'headless'
-        # mode chromedriver will ignore the other options!)
-        ## ISSUE https://bugs.chromium.org/p/chromedriver/issues/detail?id=1925
-        caps['acceptInsecureCerts'] = True
-
-        # Options for instructing the browser to log the network
-        # traffic visible to the user
-        caps['goog:loggingPrefs'] = {
-            "browser": "ALL",
-            "driver": "ALL",
-            "performance": "ALL"}
-
-        if CHROMEDRIVER_LOCK is not None:
-            CHROMEDRIVER_LOCK.acquire()
-        driver = webdriver.Chrome(desired_capabilities=caps,
-                                  options=chrome_options,
-                                  service=CHROME_SERVICE, )
+        driver = create_driver(RUN_HEADLESS, CHROMEDRIVER_LOCK)
         if (CHROMEDRIVER_LOCK is not None) and (lock_released is False):
             CHROMEDRIVER_LOCK.release()
             lock_released = True
@@ -248,7 +257,7 @@ def download_with_browser(URL,
             driver.switch_to.window(handle)
             driver.close()
     except Exception as e:
-        # raise e
+        raise e
         ts = str(datetime.now()).split(".")[0]
         exception = str(e).split("\n")[0]
         exception_str = "[%s] Exception: %s\n" % (ts, exception)
@@ -309,12 +318,12 @@ def download_with_browser(URL,
             start_ts, end_ts, cookies, banner_dict, screenshot_path)
 
 
-def detect_banner(page_source) -> dict:
+def detect_banner(page_html) -> dict:
     # detecting banner
     matched_banner_keywords = []
-    matched_banner_keywords += [detect_banner_keywords(page_source)]
-    matched_banner_keywords += [detect_banner_cookie_libs(page_source)]
-
+    matched_banner_keywords.extend(detect_banner_keywords(page_html))
+    matched_banner_keywords.extend(detect_banner_cookie_libs(page_html))
+    print(len(matched_banner_keywords))
     banner_dict = {
         'banner_detected': len(matched_banner_keywords) > 0,
         'banner_matched_on': matched_banner_keywords
@@ -323,13 +332,13 @@ def detect_banner(page_source) -> dict:
     return banner_dict
 
 
-def detect_banner_keywords(page_source) -> list:
+def detect_banner_keywords(page_html) -> list:
     banner_matched_keywords = []
-    if page_source:
+    if page_html:
         for pattern in banner_patterns:
-            if re.search(pattern, page_source, flags=re.IGNORECASE):
+            if re.search(pattern, page_html, flags=re.IGNORECASE):
                 banner_matched_keywords.append(pattern)
-
+    print(f"{banner_matched_keywords = }")
     return banner_matched_keywords
 
 
@@ -337,6 +346,9 @@ def detect_banner_cookie_libs(page_source) -> list:
     matched_patterns = []
     if page_source:
         for pattern in lib_js_file_names:
+            continue
+            # TODO fix, smth to do with slashes '//' in the javascript patterns I think
+            # https://stackoverflow.com/questions/19942314/python-multiple-repeat-error
             if pattern != "" and re.search(pattern, page_source, flags=re.IGNORECASE):
                 matched_patterns += [pattern]
 
@@ -345,10 +357,11 @@ def detect_banner_cookie_libs(page_source) -> list:
 
 if __name__ == "__main__":
     # Example: HTTPS with Chromium in headless mode
-    url = "https://bitbucket.org/"
-    (page_source, page_title, resources_ordlist, redirection_chain,
-     exception, exception_str, browserstart_ts,
-     browserend_ts, cookies) = download_with_browser(url)
+    url = "https://amazon.com/"
+
+    (page_source, page_title, resources_ordlist,
+     redirection_chain, exception, exception_str,
+     browserstart_ts, browserend_ts, cookies, banner_dict, screenshot_path) = download_with_browser(url)
     print("Start URL: %s" % (url))
     if exception is None:
         print("redirection_chain: %s" % (" => ".join([
@@ -372,4 +385,5 @@ if __name__ == "__main__":
         print()
     print("cookies:", json.dumps(cookies, indent=4))
     print("Time spent: %4.2f seconds" % (browserend_ts - browserstart_ts))
+    print(f"banner dict: {json.dumps(cookies, indent=4)}")
     print()
