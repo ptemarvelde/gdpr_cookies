@@ -347,7 +347,7 @@ def detect_banner_cookie_libs(page_source) -> list:
     if page_source:
         for pattern in lib_js_file_names:
             continue
-            # TODO fix, smth to do with slashes '//' in the javascript patterns I think
+            # TODO fix, smth to do with slashes ('//') in the javascript patterns I think
             # https://stackoverflow.com/questions/19942314/python-multiple-repeat-error
             if pattern != "" and re.search(pattern, page_source, flags=re.IGNORECASE):
                 matched_patterns += [pattern]
