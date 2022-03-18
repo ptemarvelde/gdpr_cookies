@@ -24,7 +24,7 @@ GL_SOURCE_IP = str(json.loads(requests.get('http://jsonip.com').text)["ip"])
 # stdout
 GL_STDOUT_LOCK = multiprocessing.Lock()
 # json output file
-output_dir = os.environ.get("OUTPUT_DIR", timestr = time.strftime("output_%Y%m%d-%H%M%S"))
+output_dir = os.environ.get("OUTPUT_DIR", time.strftime("output_%Y%m%d-%H%M%S"))
 GL_OUTPUT_DIR = Path(ouput_dir)
 GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
 GL_OUTPUT_FILE = GL_OUTPUT_DIR / "results.jsonl"
