@@ -114,5 +114,5 @@ for lang in languages:
 
 banner_patterns = translated_patterns
 banner_patterns.extend(banner_patterns_no_translate)
-logging.debug(f"Final patterns list, {json.dumps(banner_patterns, indent=4)}")
+logging.info(f"Final patterns list, {json.dumps(banner_patterns, indent=4)}")
 
