@@ -313,7 +313,8 @@ def download_with_browser(URL,
     end_ts = time.time()
 
     banner_dict = detect_banner(page_source)
-    print(exception_str)
+    if exception_str:
+        print(exception_str)
     return (page_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
             start_ts, end_ts, cookies, banner_dict, screenshot_path)
