@@ -7,7 +7,8 @@ ENV LOCAL_RUN=False
 
 WORKDIR /usr/workspace/pythia
 
-CMD ["python3", "task_manager.py"]
+CMD ["python3", "selenium_driver_chrome.py"]
+# CMD ["python3", "task_manager.py"]
 
 # TO run for development: # in root dir of project
 # docker build . -t selenium:latest
