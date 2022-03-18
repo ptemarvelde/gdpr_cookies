@@ -48,6 +48,7 @@ lib_js_file_names = [
     "evidon-banner\.js",  # Crownpeak (Evidon)
     "evidon.*.js",  # Crownpeak (Evidon)
     "didomi",  # Didomi
+    "consent.js"
 ]
 
 banner_patterns_translate = [
@@ -79,6 +80,7 @@ banner_patterns_translate = [
 ]
 
 banner_patterns_no_translate = [
+    "privacy- en cookiestatement"
     "cookiestatement",
     "verzamelen .{0,200}cookie",
     "collect .{0,200}cookie",
