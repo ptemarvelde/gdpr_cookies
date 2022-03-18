@@ -50,7 +50,7 @@ lib_js_file_names = [
     "didomi",  # Didomi
 ]
 
-banner_patterns_translate= [
+banner_patterns_translate = [
     # 'cookie' instead of 'cookieS' since regex will find both
     # if we put singular here
     "gebruik van cookie",
@@ -81,7 +81,7 @@ banner_patterns_translate= [
 banner_patterns_no_translate = [
     "cookiestatement",
     "verzamelen .{0,200}cookie",
-    "collect .{0,200}cookie"
+    "collect .{0,200}cookie",
     "gebruik van .{0,200}cookie",
     "accept .{0,200}cookie",
     "OneTrust-Consent",
@@ -107,9 +107,9 @@ def translate(word, lang):
     return GoogleTranslator(source="auto", target=lang).translate(word)
 
 
+translated_patterns = []
 for lang in languages:
     print(f"Translating {len(banner_patterns_translate)} phrases to {lang}")
-    translated_patterns = []
     for phrase in tqdm(banner_patterns_translate):
         translated = translate(phrase, lang)
         translated_patterns.append(translated)
@@ -117,5 +117,7 @@ for lang in languages:
 
 banner_patterns = translated_patterns
 banner_patterns.extend(banner_patterns_no_translate)
+banner_patterns.extend(banner_patterns_translate)
+
 logging.info(f"Final patterns list, {json.dumps(banner_patterns, indent=4)}")
 
