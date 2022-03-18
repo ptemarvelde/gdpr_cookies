@@ -89,6 +89,7 @@ def expand_with_protocols(RANKDOMAINS_LIST):
             # check that the uri is not in the list of those that were
             # already processed
             if uri not in GL_PROCESSED_URIS_DICT:
+                lock_print(f"Skipping {uri} as it was already processed before")
                 rankuri_list.append((rank, uri))
     return rankuri_list
 
