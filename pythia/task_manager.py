@@ -75,7 +75,7 @@ def load_domains_list(FNAME, LIMIT=1000000, SHUFFLE=True):
     fid_input.close()
     if SHUFFLE is True:
         random.shuffle(rankdomains_list)
-    print(f"querying domains: {rankdomains_list}")
+    lock_print(f"querying domains: {rankdomains_list}")
     return rankdomains_list
 
 

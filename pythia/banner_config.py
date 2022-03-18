@@ -2,6 +2,9 @@ from deep_translator import GoogleTranslator
 from tqdm import tqdm
 import os
 import logging
+import json 
+
+
 logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
 logging.getLogger('urllib3').setLevel("WARNING")
 lib_js_file_names = [
@@ -31,13 +34,13 @@ lib_js_file_names = [
     "Quantcast|window\._qevents|pixel\.quantserve\.com(\/pixel)?",  # Quantcast Choice
     "truste-consent-button|truste-consent-required|truste-show-consent|consent\.trustarc\.com",  # TrustArc (TRUSTe)
     "cookie(-|_)bar(-js|-css|\.css|\.js)|cookie_bar_message|cookie_bar_button|cookie_bar_btn_bg_colour",  # Cookie Bar (WordPress Plugins)
-    "",  # Cookie Consent (TODO:)
+    # "",  # Cookie Consent (TODO:)
     "cookie-law-bar-setting|cookie-law-bar(\.js|-js|-css|\.css)",  # Cookie Law Bar
     "settings_page_cookie-notice|cookie-notice-admin|cookie-notice-front|cookie_notice_options|cookie_notice_version|cookie_notice_accepted|cn_is_cookie_accepted|reset_cookie_notice_options|cookie-notice",  # Cookie Notice for GDPR
     "custom(-|_)cookie(-|_)message(-popup\.css|-popup-styles|-popup\.js)?|custom-cookie-message-popup\.js|custom-cookie-message-popup\.css|custom-cookie-message-popup-styles",  # Custom Cookie Message
     'eu_cookie_law_frontend_popup|eu_cookie_law_frontend_banner|eucookielaw-scripts|class="eucookie"|eu-cookie-law|<div class="pea_cook_more_info_popover"><div class="pea_cook_more_info_popover_inner"',  # EU Cookie Law
     '<span role="link" tabindex="0" data-href="#moove_gdpr_cookie_modal" class="change-settings-button">|moove-gdpr-info-bar-hidden|moove-gdpr-align-center|gdpr-cookie-compliance',  # GDPR Cookie Compliance
-    "",  # GDPR Cookie Consent (TODO:)
+    # "",  # GDPR Cookie Consent (TODO:)
     "options-general\.php?page=gdpr-tools-setting|jquery\.eu-cookie-consent\.js|gdpr-tools-public\.js|gdpr-tools-public\.css|gdpr-tools-data-settings|gdpr-confirm-wrapper",  # GDPR Tools
     "cookiechoices\.min\.js|page=wf-cookieconsent|wf_cookieconsent_options_page|wf-cookieconsent|wf_cookieconsent_setting_textarea|wf-cookie-consent|wf_cookieconsent_options",  # WF Cookie Consent
     "cookieControl-.*\.js|CookieControl\.cookieLawApplies\(|CookieControl\.consented\(|CookieControl\.maySendCookies\(",  # Cookie Control (Drupal Modules)
@@ -113,4 +116,5 @@ for lang in languages:
 
 banner_patterns = translated_patterns
 banner_patterns.extend(banner_patterns_no_translate)
+logging.debug(f"Final patterns list, {json.dumps(banner_patterns, indent=4)}")
 
