@@ -79,7 +79,10 @@ banner_patterns_translate= [
 ]
 
 banner_patterns_no_translate = [
-    "gebruik van.*cookies",
+    "cookiestatement",
+    "verzamelen.*cookie",
+    "collect.*cookie"
+    "gebruik van.*cookie",
     "accept.*cookie",
     "OneTrust-Consent",
     "Civic Cookie Control",
