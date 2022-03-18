@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import io
 from urllib.parse import urlparse
-
+import time
 import psutil
 import requests
 from tqdm import tqdm
 from pathlib import Path
-
+import os
 from dns_resolve import *
 from extract_processed_uris import *
 from process_struct import *
@@ -24,7 +24,8 @@ GL_SOURCE_IP = str(json.loads(requests.get('http://jsonip.com').text)["ip"])
 # stdout
 GL_STDOUT_LOCK = multiprocessing.Lock()
 # json output file
-GL_OUTPUT_DIR = Path("../resources/test_docker7/")
+output_dir = os.environ.get("OUTPUT_DIR", time.strftime("output_%Y%m%d-%H%M%S"))
+GL_OUTPUT_DIR = Path(output_dir)
 GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
 GL_OUTPUT_FILE = GL_OUTPUT_DIR / "results.jsonl"
 GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / "screenshots"

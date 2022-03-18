@@ -259,7 +259,6 @@ def download_with_browser(URL,
             driver.switch_to.window(handle)
             driver.close()
     except Exception as e:
-        raise e
         ts = str(datetime.now()).split(".")[0]
         exception = str(e).split("\n")[0]
         exception_str = "[%s] Exception: %s\n" % (ts, exception)
@@ -350,10 +349,9 @@ def detect_banner_cookie_libs(page_source) -> list:
     matched_patterns = []
     if page_source:
         for pattern in lib_js_file_names:
-            continue
             # TODO fix, smth to do with slashes ('//') in the javascript patterns I think
             # https://stackoverflow.com/questions/19942314/python-multiple-repeat-error
-            if pattern != "" and re.search(pattern, page_source, flags=re.IGNORECASE):
+            if re.search(pattern, page_source, flags=re.IGNORECASE):
                 matched_patterns += [pattern]
 
     return matched_patterns
