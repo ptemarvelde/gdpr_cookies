@@ -6,7 +6,7 @@ import psutil
 import requests
 from tqdm import tqdm
 from pathlib import Path
-
+import os
 from dns_resolve import *
 from extract_processed_uris import *
 from process_struct import *
