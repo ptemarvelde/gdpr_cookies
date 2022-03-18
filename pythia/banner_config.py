@@ -101,7 +101,7 @@ def translate(word, lang):
 
 
 for lang in languages:
-    print(f"Translating {len(banner_patterns)} phrases to {lang}")
+    print(f"Translating {len(banner_patterns_translate)} phrases to {lang}")
     translated_patterns = []
     for phrase in tqdm(banner_patterns_translate):
         translated = translate(phrase, lang)
