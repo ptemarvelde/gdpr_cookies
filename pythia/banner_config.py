@@ -80,10 +80,10 @@ banner_patterns_translate= [
 
 banner_patterns_no_translate = [
     "cookiestatement",
-    "verzamelen.*cookie",
-    "collect.*cookie"
-    "gebruik van.*cookie",
-    "accept.*cookie",
+    "verzamelen .{0,200}cookie",
+    "collect .{0,200}cookie"
+    "gebruik van .{0,200}cookie",
+    "accept .{0,200}cookie",
     "OneTrust-Consent",
     "Civic Cookie Control",
     "Clickio Consent Tool",
