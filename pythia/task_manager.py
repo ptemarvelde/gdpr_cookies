@@ -123,6 +123,7 @@ def url_to_domain(URL):
 def append_to_file(STRUCT):
     GL_OUTPUT_LOCK.acquire()
     GL_OUTPUT_FID.write(json.dumps(STRUCT) + "\n")
+    print(json.dumps(STRUCT) + "\n")
     GL_OUTPUT_FID.flush()
     GL_OUTPUT_LOCK.release()
 
@@ -286,6 +287,7 @@ def main():
     tot_processed = 0
     # process in chunks
     for i in tqdm(range(0, len(rankuri_list), GL_CRAWL_CHUNK_SIZE)):
+        lock_print(f"Writing to {GL_OUTPUT_FILE}")
         p = multiprocessing.Pool(GL_MAX_NUM_CHROMEDRIVER_INSTANCES)
         chunk = rankuri_list[i: i + GL_CRAWL_CHUNK_SIZE]
         p.map(fetch_info, chunk)
@@ -298,6 +300,7 @@ def main():
                        GL_CRAWL_CHUNK_SLEEP))
         time.sleep(GL_CRAWL_CHUNK_SLEEP)
         kill_bg_processes()
+
         # just to be sure that everything was (hopefully!) shut down
         time.sleep(30)
         tot_processed += len(chunk)
