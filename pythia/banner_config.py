@@ -3,7 +3,7 @@ from tqdm import tqdm
 import os
 import logging
 logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
-
+logging.getLogger('urllib3').setLevel("WARNING")
 lib_js_file_names = [
     "https://cc\.cdn\.civiccomputing\.com/.*(\.min\.js|\.js)",  # Civic Cookie Control
     # "https://cc\.cdn\.civiccomputing\.com/9/cookieControl-9\.x\.min\.js",  # Civic Cookie Control
