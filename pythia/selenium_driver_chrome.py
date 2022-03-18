@@ -17,7 +17,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from banner_config import lib_js_file_names, banner_patterns
 
 USE_BRAVE = False
-LOCAL_RUN = os.environ.get("LOCAL_RUN", "False") == "True"
+LOCAL_RUN = os.environ.get("LOCAL_RUN", "True") == "True"
 # LOCAL_RUN = os.environ.get("LOCAL_RUN", "False") == "True"
 
 
