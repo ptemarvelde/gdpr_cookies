@@ -81,6 +81,7 @@ def load_domains_list(FNAME, LIMIT=1000000, SHUFFLE=True):
 
 def expand_with_protocols(RANKDOMAINS_LIST):
     rankuri_list = []
+    protocols = ["https://www."]
     for rank, domain in RANKDOMAINS_LIST:
         # Only use https://www, difference in cookies/banners for different protocols is minimal.
         # for proto in ["http://", "http://www.", "https://", "https://www."]:
@@ -88,9 +89,11 @@ def expand_with_protocols(RANKDOMAINS_LIST):
             uri = "%s%s" % (proto, domain)
             # check that the uri is not in the list of those that were
             # already processed
-            if uri not in GL_PROCESSED_URIS_DICT:
+            if uri in GL_PROCESSED_URIS_DICT:
                 lock_print(f"Skipping {uri} as it was already processed before")
+            else:
                 rankuri_list.append((rank, uri))
+    lock_print(f"Querying {len(rankuri_list)} uri's of {RANKDOMAINS_LIST} given domains, {protocols = }")
     return rankuri_list
 
 
