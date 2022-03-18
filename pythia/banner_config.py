@@ -1,5 +1,6 @@
 from deep_translator import GoogleTranslator
 from tqdm import tqdm
+import os
 import logging
 logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
 
