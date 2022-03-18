@@ -335,7 +335,7 @@ def detect_banner(page_html) -> dict:
 def detect_banner_keywords(page_html) -> list:
     banner_matched_keywords = []
     if page_html:
-        logging.debug(f"First 100 chars in page html: {page_html[:100]")
+        logging.debug(f"First 100 chars in page html: {page_html[:100]}")
         for pattern in banner_patterns:
             logging.debug(f'pattern: {pattern}')
             if re.search(pattern, page_html, flags=re.IGNORECASE):
