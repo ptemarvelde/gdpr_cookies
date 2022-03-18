@@ -41,7 +41,7 @@ GL_EXCEPTION_LOCK = multiprocessing.Lock()
 GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
 
 # parallel browser instances
-GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 1
+GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 5
 # chunks size to be processed in batch
 GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
@@ -123,7 +123,6 @@ def url_to_domain(URL):
 def append_to_file(STRUCT):
     GL_OUTPUT_LOCK.acquire()
     GL_OUTPUT_FID.write(json.dumps(STRUCT) + "\n")
-    print(json.dumps(STRUCT) + "\n")
     GL_OUTPUT_FID.flush()
     GL_OUTPUT_LOCK.release()
 
