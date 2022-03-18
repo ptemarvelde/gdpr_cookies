@@ -1,5 +1,7 @@
 from deep_translator import GoogleTranslator
 from tqdm import tqdm
+import logging
+logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
 
 lib_js_file_names = [
     "https://cc\.cdn\.civiccomputing\.com/.*(\.min\.js|\.js)",  # Civic Cookie Control
