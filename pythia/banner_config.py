@@ -111,8 +111,8 @@ for lang in languages:
     translated_patterns = []
     for phrase in tqdm(banner_patterns_translate):
         translated = translate(phrase, lang)
-        translated_patterns.extend(translated)
-        logging.debug("translating {lang=}, {phrase}, {translated}")
+        translated_patterns.append(translated)
+        logging.debug(f"translating {lang=}, {phrase}, {translated}")
 
 banner_patterns = translated_patterns
 banner_patterns.extend(banner_patterns_no_translate)
