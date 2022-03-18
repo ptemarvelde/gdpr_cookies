@@ -46,36 +46,43 @@ lib_js_file_names = [
     "didomi",  # Didomi
 ]
 
-banner_patterns = [
-    "gebruik van.*cookies",
-    "accept.*cookie",
+banner_patterns_translate= [
+    # 'cookie' instead of 'cookieS' since regex will find both
+    # if we put singular here
+    "gebruik van cookie",
+    "accept cookie",
     "decline cookie",
     "reject cookie",
-    "reject all cookies",
+    "reject all cookie",
     "cookie consent",
-    "accept all cookies",
+    "accept all cookie",
     "cookie settings",
     "I agree",
     "I accept",
-    "allow all cookies",
-    "use of cookies",
+    "allow all cookie",
+    "use of cookie",
     "Ik ga akkoord",
     "cookies accepteren",
     "cookievoorkeuren",
-    "noodzakelijke cookies",
-    "functionele cookies",
+    "noodzakelijke cookie",
+    "functionele cookie",
     "alles accepteren",
     "accept all",
     "alle cookies accepteren",
     "cookie instellingen",
+    "Cookie Consent",
+    "Cookie Information",
+]
+
+banner_patterns_no_translate = [
+    "gebruik van.*cookies",
+    "accept.*cookie",
     "OneTrust-Consent",
     "Civic Cookie Control",
     "Clickio Consent Tool",
     "consentmanager.net",
     "cookieBAR",
     "Cookiebot",
-    "Cookie Consent",
-    "Cookie Information",
     "Crownpeak (Evidon)",
     "Didomi",
     "jquery.cookieBar",
@@ -96,6 +103,11 @@ def translate(word, lang):
 for lang in languages:
     print(f"Translating {len(banner_patterns)} phrases to {lang}")
     translated_patterns = []
-    for phrase in tqdm(banner_patterns):
-        translated_patterns.extend(translate(phrase, lang))
-banner_patterns.extend(translated_patterns)
+    for phrase in tqdm(banner_patterns_translate):
+        translated = translate(phrase, lang)
+        translated_patterns.extend(translated)
+        logging.debug("translating {lang=}, {phrase}, {translated}")
+
+banner_patterns = translated_patterns
+banner_patterns.extend(banner_patterns_no_translate)
+
