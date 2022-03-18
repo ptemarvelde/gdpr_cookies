@@ -6,6 +6,7 @@ import re
 import time as time
 import traceback
 import logging
+logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
 from datetime import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver

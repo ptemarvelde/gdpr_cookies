@@ -4,6 +4,7 @@ COPY requirements.txt .
 RUN python3 -m pip install -r requirements.txt
 ENV LOCAL_RUN=False
 
+
 WORKDIR /usr/workspace/pythia
 
 CMD ["python3", "task_manager.py"]
