@@ -5,6 +5,7 @@ import os
 import re
 import time as time
 import traceback
+import logging
 from datetime import datetime
 from bs4 import BeautifulSoup
 from selenium import webdriver
