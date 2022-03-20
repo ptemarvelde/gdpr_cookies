@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 import time
 import psutil
 import requests
+from pythia.dns_resolve import recursively_resolve_domain
 from tqdm import tqdm
 from pathlib import Path
 import os
@@ -221,6 +222,14 @@ def fetch_info(ELEM):
                 if check_if_ip(ip):
                     rdap_infos_dict[ip] = download_info_using_rdap_cache(IP=ip)
 
+            dom = url_to_domain(uri)
+            source_ip_list = [x[1] for x in recursively_resolve_domain(dom)['resolutions'] if x[0] == 'A']
+            source_url_info = download_info_using_rdap_cache(IP=source_ip_list[-1]) if len(source_ip) > 0 else None
+
+            rdap_res = {
+                "rdap_infos_dict": rdap_infos_dict,
+                "url_info": source_url_info
+            }
             # dump the results into a json
             struct = generate_struct(
                 SOURCE_IP=GL_SOURCE_IP,
