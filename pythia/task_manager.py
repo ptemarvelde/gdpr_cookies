@@ -44,10 +44,9 @@ GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
 GL_CRAWL_CHUNK_SLEEP = 30
 
-# GL_URI_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path("../resources/input/dutch_top_50.csv"))
-GL_URI_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path("../resources/testdomains.txt"))
+in_file = "dutch_top_50" if os.environ.get("DUTCH_DOMAINS", "False") == "True" else "world_top_500"
+GL_URI_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path(f"../resources/input/{in_file}.csv"))
 
-# GL_URI_FILE = "../util/data/dutch_top_50"
 GL_MAX_DOMAINS_TO_CONTACT = 1000000
 GL_SHUFFLE_DOMAINS_LIST = True
 
@@ -333,7 +332,7 @@ def main():
 
     # list of URIs already processed
     GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
-
+    lock_print(STRING=f"Running with infile: {GL_URI_FILE}")
     rankdomain_list = load_domains_list(FNAME=GL_URI_FILE,
                                         LIMIT=GL_MAX_DOMAINS_TO_CONTACT,
                                         SHUFFLE=GL_SHUFFLE_DOMAINS_LIST)
