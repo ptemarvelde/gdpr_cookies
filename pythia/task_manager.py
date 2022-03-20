@@ -300,11 +300,17 @@ def drop_columns_and_zip(result_file: Path):
 
 def main():
     output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                              Path(("../resources/" + (os.environ.get("OUTPUT_DIR") or time.strftime("output_%Y%m%d-%H%M%S")))))
+                              Path(("../resources/" +
+                                    (os.environ.get("OUTPUT_DIR") or
+                                     (os.environ.get("VM_LOCATION", "local") + "_"
+                                      + time.strftime("output_%Y%m%d-%H%M%S"))
+                                     )
+                                    ))
+                              )
     GL_OUTPUT_DIR = Path(output_dir)
     GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
-    GL_OUTPUT_FILE = GL_OUTPUT_DIR / "results.jsonl"
-    GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / "screenshots"
+    GL_OUTPUT_FILE = GL_OUTPUT_DIR / (os.environ.get("VM_LOCATION") + "results.jsonl")
+    GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / (os.environ.get("VM_LOCATION") + "screenshots")
     GL_SCREENSHOT_DIR.mkdir(exist_ok=True, parents=True)
     open(GL_OUTPUT_FILE, 'a+', encoding='utf-8').close()
     # GL_OUTPUT_FID = open(GL_OUTPUT_FILE, 'a', encoding="utf-8")
@@ -312,7 +318,7 @@ def main():
     GL_EXCEPTION_LOG_FILE = GL_OUTPUT_DIR / "exceptions.log"
     open(GL_EXCEPTION_LOG_FILE, 'a+', encoding='utf-8').close()
     # GL_EXCEPTION_LOG_FID = open(GL_EXCEPTION_LOG_FILE, 'a', encoding='utf-8')
-    
+
     # list of URIs already processed
     GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
 
