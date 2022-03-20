@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 import time
 import psutil
 import requests
-from pythia.dns_resolve import recursively_resolve_domain
 from tqdm import tqdm
 from pathlib import Path
 import os
@@ -13,7 +12,6 @@ from extract_processed_uris import *
 from process_struct import *
 from rdap_query import *
 from selenium_driver_chrome import download_with_browser
-import itertools
 
 GL_browser_PAGE_LOAD_TIMEOUT = 60
 GL_browser_RUN_HEADLESS = True
@@ -25,6 +23,7 @@ GL_SOURCE_IP = str(json.loads(requests.get('http://jsonip.com').text)["ip"])
 
 # stdout
 GL_STDOUT_LOCK = multiprocessing.Lock()
+
 # json output file
 GL_OUTPUT_LOCK = multiprocessing.Lock()
 
@@ -39,7 +38,8 @@ GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
 GL_CRAWL_CHUNK_SLEEP = 30
 
-GL_URI_FILE = "../resources/testdomains.txt"
+GL_URI_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path("../resources/testdomains.txt"))
+
 # GL_URI_FILE = "../util/data/dutch_top_50"
 GL_MAX_DOMAINS_TO_CONTACT = 1000000
 GL_SHUFFLE_DOMAINS_LIST = True
@@ -112,10 +112,11 @@ def url_to_domain(URL):
     return domain
 
 
-def append_to_file(STRUCT, GL_OUTPUT_FID):
+def append_to_file(STRUCT, GL_OUTPUT_PATH):
     GL_OUTPUT_LOCK.acquire()
-    GL_OUTPUT_FID.write(json.dumps(STRUCT) + "\n")
-    GL_OUTPUT_FID.flush()
+    fid = open(GL_OUTPUT_PATH, 'a+')
+    fid.write(json.dumps(STRUCT) + "\n")
+    fid.close()
     GL_OUTPUT_LOCK.release()
 
 
@@ -132,7 +133,7 @@ def log_exception(EXCEPTION_STR,
         EXCEPTION_LOG_FID.write(EXCEPTION_STR + "\n\n")
         EXCEPTION_LOG_FID.flush()
     else:
-        fid = open(EXCEPTION_LOG_FILE, 'a')
+        fid = open(EXCEPTION_LOG_FILE, 'a+')
         fid.write(EXCEPTION_STR + "\n")
         fid.close()
 
@@ -160,7 +161,7 @@ def kill_bg_processes():
             pass
 
 
-def fetch_info(ELEM, GL_OUTPUT_FID, GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID, GL_SCREENSHOT_DIR):
+def fetch_info(ELEM, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR):
     rank, uri = ELEM
     lock_print("%s => %s [rank: %s]" % (
         str(datetime.now()).split(".")[0], uri, rank))
@@ -263,7 +264,7 @@ def fetch_info(ELEM, GL_OUTPUT_FID, GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID,
                                      BANNER=banner,
                                      SCREENSHOT_FILE=screenshot_file)
 
-        append_to_file(struct, GL_OUTPUT_FID)
+        append_to_file(struct, GL_OUTPUT_FILE)
     except Exception as e:
         ts = str(datetime.now()).split(".")[0]
         exception = str(e).split("\n")[0]
@@ -272,24 +273,23 @@ def fetch_info(ELEM, GL_OUTPUT_FID, GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID,
         exception_str += "** FUNCTION=main\n"
         exception_str += "*** ELEM=%s\n" % (str(ELEM))
         exception_str += "**** %s" % traceback.format_exc()
-        lock_log_exception(GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID, EXC_STR=exception_str)
-
-def fetch_info_star(a_b):
-    """Convert `f([1,2])` to `f(1,2)` call."""
-    print(*a_b)
-    return fetch_info(*a_b)
+        lock_log_exception(GL_EXCEPTION_LOG_FILE=GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID=None, EXC_STR=exception_str)
 
 def main():
-    output_dir = os.environ.get("OUTPUT_DIR", "../resources/" + time.strftime("output_%Y%m%d-%H%M%S"))
+    # output_dir = os.environ.get("OUTPUT_DIR", "../resources/" + time.strftime("output_%Y%m%d-%H%M%S"))
+    output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path("../resources/" + time.strftime("output_%Y%m%d-%H%M%S")))
     GL_OUTPUT_DIR = Path(output_dir)
     GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
     GL_OUTPUT_FILE = GL_OUTPUT_DIR / "results.jsonl"
     GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / "screenshots"
     GL_SCREENSHOT_DIR.mkdir(exist_ok=True, parents=True)
-    GL_OUTPUT_FID = io.open(GL_OUTPUT_FILE, 'a', encoding="utf-8")
+    open(GL_OUTPUT_FILE, 'a+', encoding='utf-8').close()
+    # GL_OUTPUT_FID = open(GL_OUTPUT_FILE, 'a', encoding="utf-8")
 
     GL_EXCEPTION_LOG_FILE = GL_OUTPUT_DIR / "exceptions.log"
-    GL_EXCEPTION_LOG_FID = open(GL_EXCEPTION_LOG_FILE, 'a', encoding='utf-8')
+    open(GL_EXCEPTION_LOG_FILE, 'a+', encoding='utf-8').close()
+    # GL_EXCEPTION_LOG_FID = open(GL_EXCEPTION_LOG_FILE, 'a', encoding='utf-8')
+    GL_EXCEPTION_LOG_FID = None
     
     # list of URIs already processed
     GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
@@ -308,15 +308,9 @@ def main():
         lock_print(f"Writing to {GL_OUTPUT_FILE}")
         p = multiprocessing.Pool(GL_MAX_NUM_CHROMEDRIVER_INSTANCES)
         chunk = rankuri_list[i: i + GL_CRAWL_CHUNK_SIZE]
-        p.map(
-            fetch_info_star,
-            itertools.izip(
-                chunk, 
-                itertools.repeat(GL_OUTPUT_FID),
-                itertools.repeat(GL_EXCEPTION_LOG_FILE),
-                itertools.repeat(GL_EXCEPTION_LOG_FID),
-                itertools.repeat(GL_SCREENSHOT_DIR),
-            )
+        p.starmap(
+            fetch_info,
+            [(c, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR) for c in chunk]
         )
         # p.map(fetch_info, chunk)
         p.close()
