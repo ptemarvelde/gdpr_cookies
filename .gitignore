@@ -4,3 +4,4 @@ pythia/samples/
 venv
 *.pdf
 resources/
+__pycache__

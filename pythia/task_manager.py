@@ -14,10 +14,10 @@ from extract_processed_uris import *
 from process_struct import *
 from rdap_query import *
 from selenium_driver_chrome import download_with_browser
+import sys
+sys.path.append("../")
 from util.utils import load_output
 
-import sys
-sys.path.append("../util")
 
 
 GL_browser_PAGE_LOAD_TIMEOUT = 60
