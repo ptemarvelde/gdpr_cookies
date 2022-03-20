@@ -92,9 +92,8 @@ def download_with_browser(URL,
                           RUN_HEADLESS=True,
                           MIN_PAGE_LOAD_TIMEOUT=4,
                           PAGE_LOAD_TIMEOUT=60,
-                          CHROMEDRIVER_LOCK=None):
-    from task_manager import GL_SCREENSHOT_DIR
-
+                          CHROMEDRIVER_LOCK=None,
+                          GL_SCREENSHOT_DIR=None):
     def get_new_netlog_msgs(DRIVER):
         try:
             return [json.loads(elem["message"])["message"]
@@ -162,9 +161,10 @@ def download_with_browser(URL,
         # sleep to let banner appear
         time.sleep(5)
 
-        screenshot_path: str = str((GL_SCREENSHOT_DIR / (URL.replace('://', '_') + ".png")).resolve())
-        if not driver.save_screenshot(str(screenshot_path)):
-            screenshot_path = "Screenshot failed"
+        if GL_SCREENSHOT_DIR:
+            screenshot_path: str = str((GL_SCREENSHOT_DIR / (URL.replace('://', '_') + ".png")).resolve())
+            if not driver.save_screenshot(str(screenshot_path)):
+                screenshot_path = "Screenshot failed"
 
         # We need to put it into a variable, otherwise when
         # calling again "driver.get_log('performance')" it will
