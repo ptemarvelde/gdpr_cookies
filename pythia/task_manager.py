@@ -13,9 +13,9 @@ from extract_processed_uris import *
 from process_struct import *
 from rdap_query import *
 from selenium_driver_chrome import download_with_browser
+import sys
+sys.path.append("../")
 from util.utils import load_output
-
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../util"))
 
 GL_browser_PAGE_LOAD_TIMEOUT = 60
 GL_browser_RUN_HEADLESS = True
