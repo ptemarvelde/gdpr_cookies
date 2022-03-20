@@ -54,9 +54,12 @@ def create_driver(run_headless=True, chromedriver_lock=None):
     chrome_options.add_argument("--allow-running-insecure-content")
     chrome_options.add_argument("--window-size=1980,960")
     chrome_options.add_argument("--no-sandbox")
+
     # This excludes Devtools socket logging
-    # chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    #
+    if USE_BRAVE:
+        chrome_options.binary_location = BRAVE_BIN_PATH
+        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    
     if run_headless is True:
         chrome_options.add_argument("--headless")
     if gl_SPOOFED_USER_AGENT:
