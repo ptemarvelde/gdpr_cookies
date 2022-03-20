@@ -160,7 +160,7 @@ def kill_bg_processes():
             pass
 
 
-def fetch_info(ELEM, GL_OUTPUT_FID, GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID):
+def fetch_info(ELEM, GL_OUTPUT_FID, GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID, GL_SCREENSHOT_DIR):
     rank, uri = ELEM
     lock_print("%s => %s [rank: %s]" % (
         str(datetime.now()).split(".")[0], uri, rank))
@@ -308,7 +308,16 @@ def main():
         lock_print(f"Writing to {GL_OUTPUT_FILE}")
         p = multiprocessing.Pool(GL_MAX_NUM_CHROMEDRIVER_INSTANCES)
         chunk = rankuri_list[i: i + GL_CRAWL_CHUNK_SIZE]
-        p.map(fetch_info_star, itertools.izip(chunk, itertools.repeat(GL_OUTPUT_FID), itertools.repeat(GL_EXCEPTION_LOG_FILE), itertools.repeat(GL_EXCEPTION_LOG_FID)))
+        p.map(
+            fetch_info_star,
+            itertools.izip(
+                chunk, 
+                itertools.repeat(GL_OUTPUT_FID),
+                itertools.repeat(GL_EXCEPTION_LOG_FILE),
+                itertools.repeat(GL_EXCEPTION_LOG_FID),
+                itertools.repeat(GL_SCREENSHOT_DIR),
+            )
+        )
         # p.map(fetch_info, chunk)
         p.close()
         p.join()
