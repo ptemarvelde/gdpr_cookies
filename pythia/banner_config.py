@@ -108,18 +108,20 @@ languages = ["fr", "es", "hi"]
 def translate(word, lang):
     return GoogleTranslator(source="auto", target=lang).translate(word)
 
+def get_banner_patterns():
+    translated_patterns = []
+    for lang in languages:
+        print(f"Translating {len(banner_patterns_translate)} phrases to {lang}")
+        for phrase in tqdm(banner_patterns_translate):
+            translated = translate(phrase, lang)
+            translated_patterns.append(translated)
+            logging.debug(f"translating {lang=}, {phrase}, {translated}")
 
-translated_patterns = []
-for lang in languages:
-    print(f"Translating {len(banner_patterns_translate)} phrases to {lang}")
-    for phrase in tqdm(banner_patterns_translate):
-        translated = translate(phrase, lang)
-        translated_patterns.append(translated)
-        logging.debug(f"translating {lang=}, {phrase}, {translated}")
+    banner_patterns = translated_patterns
+    banner_patterns.extend(banner_patterns_no_translate)
+    banner_patterns.extend(banner_patterns_translate)
 
-banner_patterns = translated_patterns
-banner_patterns.extend(banner_patterns_no_translate)
-banner_patterns.extend(banner_patterns_translate)
+    logging.info(f"Final patterns list, {json.dumps(banner_patterns, indent=4)}")
 
-logging.info(f"Final patterns list, {json.dumps(banner_patterns, indent=4)}")
+    return banner_patterns
 

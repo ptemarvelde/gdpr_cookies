@@ -15,12 +15,11 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-from banner_config import lib_js_file_names, banner_patterns
+from banner_config import lib_js_file_names
 
 USE_BRAVE = False
 LOCAL_RUN = os.environ.get("LOCAL_RUN", "True") == "True"
 # LOCAL_RUN = os.environ.get("LOCAL_RUN", "False") == "True"
-
 
 # NOTE: make sure that both binary and driver have the same version.
 CHROME_SERVICE = None if not LOCAL_RUN else Service(
@@ -98,7 +97,8 @@ def download_with_browser(URL,
                           MIN_PAGE_LOAD_TIMEOUT=4,
                           PAGE_LOAD_TIMEOUT=60,
                           CHROMEDRIVER_LOCK=None,
-                          GL_SCREENSHOT_DIR=None):
+                          GL_SCREENSHOT_DIR=None,
+                          BANNER_PATTERNS=None):
     def get_new_netlog_msgs(DRIVER):
         try:
             return [json.loads(elem["message"])["message"]
@@ -319,7 +319,7 @@ def download_with_browser(URL,
             CHROMEDRIVER_LOCK.release()
     end_ts = time.time()
 
-    banner_dict = detect_banner(first_source)
+    banner_dict = detect_banner(first_source, BANNER_PATTERNS)
     if exception_str:
         print(exception_str)
     return (first_source, page_title, resources_ordlist,
@@ -327,10 +327,10 @@ def download_with_browser(URL,
             start_ts, end_ts, cookies, banner_dict, screenshot_path)
 
 
-def detect_banner(page_html) -> dict:
+def detect_banner(page_html, banner_patterns) -> dict:
     # detecting banner
     matched_banner_keywords = []
-    matched_banner_keywords.extend(detect_banner_keywords(page_html))
+    matched_banner_keywords.extend(detect_banner_keywords(page_html, banner_patterns))
     matched_banner_keywords.extend(detect_banner_cookie_libs(page_html))
     print(len(matched_banner_keywords))
     banner_dict = {
@@ -341,7 +341,7 @@ def detect_banner(page_html) -> dict:
     return banner_dict
 
 
-def detect_banner_keywords(page_html) -> list:
+def detect_banner_keywords(page_html, banner_patterns) -> list:
     banner_matched_keywords = []
     if page_html:
         logging.debug(f"First 100 chars in page html: {page_html[:100]}")

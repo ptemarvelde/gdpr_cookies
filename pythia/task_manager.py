@@ -13,6 +13,9 @@ from extract_processed_uris import *
 from process_struct import *
 from rdap_query import *
 from selenium_driver_chrome import download_with_browser
+from banner_config import get_banner_patterns
+import sys
+sys.path.append("../")
 from util.utils import load_output
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../util"))
@@ -165,7 +168,7 @@ def kill_bg_processes():
             pass
 
 
-def fetch_info(ELEM, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR):
+def fetch_info(ELEM, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR, BANNER_PATTERNS):
     rank, uri = ELEM
     lock_print("%s => %s [rank: %s]" % (
         str(datetime.now()).split(".")[0], uri, rank))
@@ -178,7 +181,8 @@ def fetch_info(ELEM, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR):
             RUN_HEADLESS=GL_browser_RUN_HEADLESS,
             PAGE_LOAD_TIMEOUT=GL_browser_PAGE_LOAD_TIMEOUT,
             CHROMEDRIVER_LOCK=GL_CHROMEDRIVER_LOCK,
-            GL_SCREENSHOT_DIR=GL_SCREENSHOT_DIR)
+            GL_SCREENSHOT_DIR=GL_SCREENSHOT_DIR,
+            BANNER_PATTERNS=BANNER_PATTERNS)
 
         if (exception is None) and (len(resources_ordlist) >= 1):
             # generate a list of unique URLs
@@ -319,6 +323,8 @@ def main():
     open(GL_EXCEPTION_LOG_FILE, 'a+', encoding='utf-8').close()
     # GL_EXCEPTION_LOG_FID = open(GL_EXCEPTION_LOG_FILE, 'a', encoding='utf-8')
 
+    BANNER_PATTERNS = get_banner_patterns()
+
     # list of URIs already processed
     GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
 
@@ -338,7 +344,7 @@ def main():
         chunk = rankuri_list[i: i + GL_CRAWL_CHUNK_SIZE]
         p.starmap(
             fetch_info,
-            [(c, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR) for c in chunk]
+            [(c, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR, BANNER_PATTERNS) for c in chunk]
         )
         # p.map(fetch_info, chunk)
         p.close()
