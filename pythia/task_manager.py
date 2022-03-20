@@ -294,7 +294,7 @@ def drop_columns_and_zip(result_file: Path):
         "rdap_module.url_info.asn_country_code",
         "rdap_module.url_info.query",
         "source_ip", "browser_module.uri",
-        "browser_module.page_source", "browser_module.screenshot_file",
+        "browser_module.screenshot_file",
         "domain"
     ]
     df = load_output(result_file, keep_cols=keep_cols)
