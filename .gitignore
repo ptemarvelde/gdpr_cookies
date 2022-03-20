@@ -2,8 +2,5 @@
 pythia/__pycache__/
 pythia/samples/
 venv
-resources/dutch_run_1/screenshots/https_www.npostart.nl.png
-resources/dutch_run_1/screenshots/
 *.pdf
-resources/test_docker7/
-resources/test*/
+resources/
