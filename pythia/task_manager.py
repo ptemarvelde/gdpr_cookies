@@ -37,7 +37,6 @@ GL_OUTPUT_LOCK = multiprocessing.Lock()
 # exception file
 GL_EXCEPTION_LOCK = multiprocessing.Lock()
 
-
 # parallel browser instances
 GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 5
 # chunks size to be processed in batch
@@ -282,7 +281,9 @@ def fetch_info(ELEM, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR, B
         exception_str += "** FUNCTION=main\n"
         exception_str += "*** ELEM=%s\n" % (str(ELEM))
         exception_str += "**** %s" % traceback.format_exc()
-        lock_log_exception(GL_EXCEPTION_LOG_FILE=GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID=None, EXC_STR=exception_str)
+        lock_log_exception(GL_EXCEPTION_LOG_FILE=GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID=None,
+                           EXC_STR=exception_str)
+
 
 def drop_columns_and_zip(result_file: Path):
     keep_cols = [
@@ -299,6 +300,9 @@ def drop_columns_and_zip(result_file: Path):
     df = load_output(result_file, keep_cols=keep_cols)
     zip_out = ".".join(str(result_file).split(".")[:-1]) + ".json.gz"
     lock_print(STRING=f'Selecting sub columns and zipping to {".".join(str(result_file).split(".")[:-1]) + ".json.gz"}')
+
+    lock_print(String=df.describe())
+
     df.to_json(zip_out, compression="gzip")
 
 
