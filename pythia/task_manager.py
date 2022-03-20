@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-import io
 import os
+import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
-import pandas as pd
 import psutil
 import requests
 from tqdm import tqdm
@@ -14,11 +13,9 @@ from extract_processed_uris import *
 from process_struct import *
 from rdap_query import *
 from selenium_driver_chrome import download_with_browser
-import sys
-sys.path.append("../")
 from util.utils import load_output
 
-
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../util"))
 
 GL_browser_PAGE_LOAD_TIMEOUT = 60
 GL_browser_RUN_HEADLESS = True
@@ -302,8 +299,8 @@ def drop_columns_and_zip(result_file: Path):
 
 
 def main():
-    # output_dir = os.environ.get("OUTPUT_DIR", "../resources/" + time.strftime("output_%Y%m%d-%H%M%S"))
-    output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path("../resources/" + time.strftime("output_%Y%m%d-%H%M%S")))
+    output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                              Path(("../resources/" + (os.environ.get("OUTPUT_DIR") or time.strftime("output_%Y%m%d-%H%M%S")))))
     GL_OUTPUT_DIR = Path(output_dir)
     GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
     GL_OUTPUT_FILE = GL_OUTPUT_DIR / "results.jsonl"
