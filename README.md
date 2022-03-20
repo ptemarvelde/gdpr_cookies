@@ -2,7 +2,7 @@
     Compute Enginge -> VM instances -> Create an instance -> Set name to location it will run in -> Set region ->
     e2-medium (default) -> Boot disk image: select Ubuntu 20.04 -> Create
  
- Wait till VM is started, connect with ssh
+ Wait till VM is started then connect with ssh
  
 
 install curl/git/needed packages for docker
@@ -31,6 +31,6 @@ Build image
     sudo docker build -t hacking-lab-crawler:latest .
     cd ../
 
-Run image
+Run image (may need `sudo` for docker, so add it before the run command or do `sudo su`)
 
     docker run -v ${PWD}:/usr/workspace --env VM_LOCATION=$(< /etc/hostname) --env DUTCH_DOMAINS=True -it --shm-size=2048m hacking-lab-crawler:latest
