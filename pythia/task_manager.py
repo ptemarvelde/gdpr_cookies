@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 import io
+import os
+from pathlib import Path
 from urllib.parse import urlparse
-import time
+
+import pandas as pd
 import psutil
 import requests
-from pythia.dns_resolve import recursively_resolve_domain
 from tqdm import tqdm
-from pathlib import Path
-import os
+
 from dns_resolve import *
 from extract_processed_uris import *
 from process_struct import *
 from rdap_query import *
 from selenium_driver_chrome import download_with_browser
+from util.utils import load_output
 
 GL_browser_PAGE_LOAD_TIMEOUT = 60
 GL_browser_RUN_HEADLESS = True
@@ -183,7 +185,6 @@ def fetch_info(ELEM):
             PAGE_LOAD_TIMEOUT=GL_browser_PAGE_LOAD_TIMEOUT,
             CHROMEDRIVER_LOCK=GL_CHROMEDRIVER_LOCK,
             GL_SCREENSHOT_DIR=GL_SCREENSHOT_DIR)
-
         if (exception is None) and (len(resources_ordlist) >= 1):
             # generate a list of unique URLs
             unique_urls = set([el[0] for el in resources_ordlist])
@@ -224,13 +225,14 @@ def fetch_info(ELEM):
                     rdap_infos_dict[ip] = download_info_using_rdap_cache(IP=ip)
 
             dom = url_to_domain(uri)
-            source_ip_list = [x[1] for x in recursively_resolve_domain(dom)['resolutions'] if x[0] == 'A']
+            source_ip_list = [x[1] for x in recursively_resolve_domain(dom)[0] if x[0] == 'A']
             source_url_info = download_info_using_rdap_cache(IP=source_ip_list[-1]) if len(source_ip_list) > 0 else None
 
             rdap_res = {
                 "rdap_infos_dict": rdap_infos_dict,
                 "url_info": source_url_info
             }
+
             # dump the results into a json
             struct = generate_struct(
                 SOURCE_IP=GL_SOURCE_IP,
@@ -247,7 +249,7 @@ def fetch_info(ELEM):
                 # dns
                 UNIQUE_DOMAINS_RESOLUTIONS=unique_domains_resolutions,
                 # rdap
-                RDAP_INFOS_DICT=rdap_infos_dict,
+                RDAP_INFOS_DICT=rdap_res,
                 COOKIES=cookies,
                 BANNER=banner,
                 SCREENSHOT_FILE=screenshot_file
@@ -284,7 +286,27 @@ def fetch_info(ELEM):
         lock_log_exception(EXC_STR=exception_str)
 
 
+def drop_columns_and_zip(result_file: Path):
+    keep_cols = [
+        "browser_module.cookies.cookies",
+        "browser_module.cookies.request_timestamp",
+        "browser_module.banner.banner_detected",
+        "browser_module.banner.banner_matched_on",
+        "rdap_module.url_info.asn_country_code",
+        "rdap_module.url_info.query",
+        "source_ip", "browser_module.uri",
+        "browser_module.page_source", "browser_module.screenshot_file",
+        "domain"
+    ]
+    df = load_output(result_file, keep_cols=keep_cols)
+    zip_out = ".".join(str(result_file).split(".")[:-1]) + ".json.gz"
+    lock_print(STRING=f'Selecting sub columns and zipping to {".".join(str(result_file).split(".")[:-1]) + ".json.gz"}')
+    df.to_json(zip_out, compression="gzip")
+
+
 def main():
+    drop_columns_and_zip("../resources/test_sub_output2/results.jsonl")
+    return
     rankdomain_list = load_domains_list(FNAME=GL_URI_FILE,
                                         LIMIT=GL_MAX_DOMAINS_TO_CONTACT,
                                         SHUFFLE=GL_SHUFFLE_DOMAINS_LIST)
@@ -313,6 +335,7 @@ def main():
         # just to be sure that everything was (hopefully!) shut down
         time.sleep(30)
         tot_processed += len(chunk)
+    drop_columns_and_zip(GL_OUTPUT_FILE)
 
 
 if __name__ == "__main__":
