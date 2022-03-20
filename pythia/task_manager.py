@@ -16,6 +16,9 @@ from rdap_query import *
 from selenium_driver_chrome import download_with_browser
 from util.utils import load_output
 
+import sys
+sys.path.append("../util")
+
 
 GL_browser_PAGE_LOAD_TIMEOUT = 60
 GL_browser_RUN_HEADLESS = True
