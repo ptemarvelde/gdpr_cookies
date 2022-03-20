@@ -172,7 +172,8 @@ def fetch_info(ELEM, GL_OUTPUT_FID, GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID)
             URL=uri,
             RUN_HEADLESS=GL_browser_RUN_HEADLESS,
             PAGE_LOAD_TIMEOUT=GL_browser_PAGE_LOAD_TIMEOUT,
-            CHROMEDRIVER_LOCK=GL_CHROMEDRIVER_LOCK)
+            CHROMEDRIVER_LOCK=GL_CHROMEDRIVER_LOCK,
+            GL_SCREENSHOT_DIR=GL_SCREENSHOT_DIR)
 
         if (exception is None) and (len(resources_ordlist) >= 1):
             # generate a list of unique URLs
@@ -215,7 +216,7 @@ def fetch_info(ELEM, GL_OUTPUT_FID, GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID)
 
             dom = url_to_domain(uri)
             source_ip_list = [x[1] for x in recursively_resolve_domain(dom)['resolutions'] if x[0] == 'A']
-            source_url_info = download_info_using_rdap_cache(IP=source_ip_list[-1]) if len(source_ip) > 0 else None
+            source_url_info = download_info_using_rdap_cache(IP=source_ip_list[-1]) if len(source_ip_list) > 0 else None
 
             rdap_res = {
                 "rdap_infos_dict": rdap_infos_dict,
