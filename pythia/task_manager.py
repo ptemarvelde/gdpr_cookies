@@ -8,13 +8,13 @@ import psutil
 import requests
 from tqdm import tqdm
 
+from banner_config import get_banner_patterns
 from dns_resolve import *
 from extract_processed_uris import *
 from process_struct import *
 from rdap_query import *
 from selenium_driver_chrome import download_with_browser
-from banner_config import get_banner_patterns
-import sys
+
 sys.path.append("../")
 from util.utils import load_output
 
@@ -38,12 +38,13 @@ GL_OUTPUT_LOCK = multiprocessing.Lock()
 GL_EXCEPTION_LOCK = multiprocessing.Lock()
 
 # parallel browser instances
-GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 5
+GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 1
 # chunks size to be processed in batch
 GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
 GL_CRAWL_CHUNK_SLEEP = 30
 
+# GL_URI_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path("../resources/input/dutch_top_50.csv"))
 GL_URI_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path("../resources/testdomains.txt"))
 
 # GL_URI_FILE = "../util/data/dutch_top_50"
@@ -301,7 +302,7 @@ def drop_columns_and_zip(result_file: Path):
     zip_out = ".".join(str(result_file).split(".")[:-1]) + ".json.gz"
     lock_print(STRING=f'Selecting sub columns and zipping to {".".join(str(result_file).split(".")[:-1]) + ".json.gz"}')
 
-    lock_print(String=df.describe().to_string())
+    lock_print(STRING=f"Writing {len(df.columns)} columns, {len(df)} rows")
 
     df.to_json(zip_out, compression="gzip")
 
@@ -317,9 +318,10 @@ def main():
                               )
     GL_OUTPUT_DIR = Path(output_dir)
     GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
-    GL_OUTPUT_FILE = GL_OUTPUT_DIR / (os.environ.get("VM_LOCATION") + "results.jsonl")
-    GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / (os.environ.get("VM_LOCATION") + "screenshots")
-    GL_SCREENSHOT_DIR.mkdir(exist_ok=True, parents=True)
+    GL_OUTPUT_FILE = GL_OUTPUT_DIR / (os.environ.get("VM_LOCATION", '') + "results.jsonl")
+    GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / (os.environ.get("VM_LOCATION", '') + "screenshots")
+    (GL_SCREENSHOT_DIR / "banner_detected").mkdir(exist_ok=True, parents=True)
+    (GL_SCREENSHOT_DIR / "no_banner_detected").mkdir(exist_ok=True, parents=True)
     open(GL_OUTPUT_FILE, 'a+', encoding='utf-8').close()
     # GL_OUTPUT_FID = open(GL_OUTPUT_FILE, 'a', encoding="utf-8")
 

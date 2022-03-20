@@ -143,7 +143,7 @@ def download_with_browser(URL,
     start_ts, end_ts = time.time(), time.time()
     cookies = None
     banner_detected = False
-    screenshot_path = ""
+    screenshot_bytes = None
     first_source = None
     try:
         driver = create_driver(RUN_HEADLESS, CHROMEDRIVER_LOCK)
@@ -166,12 +166,12 @@ def download_with_browser(URL,
         }
         # sleep to let banner appear
         time.sleep(5)
-
+        screenshot_bytes = None
+        current_source = driver.page_source
         if GL_SCREENSHOT_DIR:
-            screenshot_path: str = str((GL_SCREENSHOT_DIR / (URL.replace('://', '_') + ".png")).resolve())
-            if not driver.save_screenshot(str(screenshot_path)):
-                screenshot_path = "Screenshot failed"
-
+            screenshot_bytes = driver.get_screenshot_as_png()
+            if not screenshot_bytes:
+                screenshot_path = None
         # We need to put it into a variable, otherwise when
         # calling again "driver.get_log('performance')" it will
         # return None.
@@ -296,7 +296,7 @@ def download_with_browser(URL,
                         if url_to == redirection_chain[0]:
                             redirection_chain.insert(0, url_from)
         if (len(redirection_chain) >= 1) and \
-                (redirection_chain[-1] == current_url) and \
+                (current_url in redirection_chain) and \
                 landing_url_reachable is True:
             # Get the HTML source and the <title>
             page_source = current_source
@@ -320,6 +320,13 @@ def download_with_browser(URL,
     end_ts = time.time()
 
     banner_dict = detect_banner(first_source, BANNER_PATTERNS)
+
+    if screenshot_bytes:
+        found_str = "banner_detected" if banner_dict['banner_detected'] else "no_banner_detected"
+        screenshot_path: str = str((GL_SCREENSHOT_DIR / found_str / (URL.replace('://', '_') + ".png")).resolve())
+        with open(screenshot_path, 'wb') as f:
+            f.write(screenshot_bytes)
+
     if exception_str:
         print(exception_str)
     return (first_source, page_title, resources_ordlist,

@@ -34,4 +34,4 @@ def write_domain_df_to_csv(df_: pd.DataFrame, file: Path) -> None:
 
 
 if __name__ == '__main__':
-    get_and_write_domains('../resources/data', dutch_limit=50, world_limit=500)
+    get_and_write_domains('../resources/input', dutch_limit=50, world_limit=500)
