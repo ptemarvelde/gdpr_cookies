@@ -13,6 +13,7 @@ from extract_processed_uris import *
 from process_struct import *
 from rdap_query import *
 from selenium_driver_chrome import download_with_browser
+import itertools
 
 GL_browser_PAGE_LOAD_TIMEOUT = 60
 GL_browser_RUN_HEADLESS = True
@@ -25,21 +26,11 @@ GL_SOURCE_IP = str(json.loads(requests.get('http://jsonip.com').text)["ip"])
 # stdout
 GL_STDOUT_LOCK = multiprocessing.Lock()
 # json output file
-output_dir = os.environ.get("OUTPUT_DIR", "../resources/" + time.strftime("output_%Y%m%d-%H%M%S"))
-GL_OUTPUT_DIR = Path(output_dir)
-GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
-GL_OUTPUT_FILE = GL_OUTPUT_DIR / "results.jsonl"
-GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / "screenshots"
-GL_SCREENSHOT_DIR.mkdir(exist_ok=True, parents=True)
-GL_OUTPUT_FID = io.open(GL_OUTPUT_FILE, 'a', encoding="utf-8")
 GL_OUTPUT_LOCK = multiprocessing.Lock()
+
 # exception file
-GL_EXCEPTION_LOG_FILE = GL_OUTPUT_DIR / "exceptions.log"
-GL_EXCEPTION_LOG_FID = open(GL_EXCEPTION_LOG_FILE, 'a', encoding='utf-8')
 GL_EXCEPTION_LOCK = multiprocessing.Lock()
 
-# list of URIs already processed
-GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
 
 # parallel browser instances
 GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 5
@@ -81,7 +72,7 @@ def load_domains_list(FNAME, LIMIT=1000000, SHUFFLE=True):
     return rankdomains_list
 
 
-def expand_with_protocols(RANKDOMAINS_LIST):
+def expand_with_protocols(RANKDOMAINS_LIST, GL_PROCESSED_URIS_DICT):
     rankuri_list = []
     protocols = ["https://www."]
     for rank, domain in RANKDOMAINS_LIST:
@@ -121,7 +112,7 @@ def url_to_domain(URL):
     return domain
 
 
-def append_to_file(STRUCT):
+def append_to_file(STRUCT, GL_OUTPUT_FID):
     GL_OUTPUT_LOCK.acquire()
     GL_OUTPUT_FID.write(json.dumps(STRUCT) + "\n")
     GL_OUTPUT_FID.flush()
@@ -146,7 +137,7 @@ def log_exception(EXCEPTION_STR,
         fid.close()
 
 
-def lock_log_exception(EXC_STR):
+def lock_log_exception(GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID, EXC_STR):
     GL_EXCEPTION_LOCK.acquire()
     log_exception(EXCEPTION_STR=EXC_STR,
                   EXCEPTION_LOG_FILE=GL_EXCEPTION_LOG_FILE,
@@ -169,7 +160,7 @@ def kill_bg_processes():
             pass
 
 
-def fetch_info(ELEM):
+def fetch_info(ELEM, GL_OUTPUT_FID, GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID):
     rank, uri = ELEM
     lock_print("%s => %s [rank: %s]" % (
         str(datetime.now()).split(".")[0], uri, rank))
@@ -271,7 +262,7 @@ def fetch_info(ELEM):
                                      BANNER=banner,
                                      SCREENSHOT_FILE=screenshot_file)
 
-        append_to_file(struct)
+        append_to_file(struct, GL_OUTPUT_FID)
     except Exception as e:
         ts = str(datetime.now()).split(".")[0]
         exception = str(e).split("\n")[0]
@@ -280,17 +271,35 @@ def fetch_info(ELEM):
         exception_str += "** FUNCTION=main\n"
         exception_str += "*** ELEM=%s\n" % (str(ELEM))
         exception_str += "**** %s" % traceback.format_exc()
-        lock_log_exception(EXC_STR=exception_str)
+        lock_log_exception(GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID, EXC_STR=exception_str)
 
+def fetch_info_star(a_b):
+    """Convert `f([1,2])` to `f(1,2)` call."""
+    print(*a_b)
+    return fetch_info(*a_b)
 
 def main():
+    output_dir = os.environ.get("OUTPUT_DIR", "../resources/" + time.strftime("output_%Y%m%d-%H%M%S"))
+    GL_OUTPUT_DIR = Path(output_dir)
+    GL_OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
+    GL_OUTPUT_FILE = GL_OUTPUT_DIR / "results.jsonl"
+    GL_SCREENSHOT_DIR = GL_OUTPUT_DIR / "screenshots"
+    GL_SCREENSHOT_DIR.mkdir(exist_ok=True, parents=True)
+    GL_OUTPUT_FID = io.open(GL_OUTPUT_FILE, 'a', encoding="utf-8")
+
+    GL_EXCEPTION_LOG_FILE = GL_OUTPUT_DIR / "exceptions.log"
+    GL_EXCEPTION_LOG_FID = open(GL_EXCEPTION_LOG_FILE, 'a', encoding='utf-8')
+    
+    # list of URIs already processed
+    GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
+
     rankdomain_list = load_domains_list(FNAME=GL_URI_FILE,
                                         LIMIT=GL_MAX_DOMAINS_TO_CONTACT,
                                         SHUFFLE=GL_SHUFFLE_DOMAINS_LIST)
     # expand expand each string that represents a domain name with the
     # four prefixes: "http://", "http://www.", "https://",
     # "https://www." (in order to generate a valid URL that)
-    rankuri_list = expand_with_protocols(rankdomain_list)
+    rankuri_list = expand_with_protocols(rankdomain_list, GL_PROCESSED_URIS_DICT)
 
     tot_processed = 0
     # process in chunks
@@ -298,7 +307,8 @@ def main():
         lock_print(f"Writing to {GL_OUTPUT_FILE}")
         p = multiprocessing.Pool(GL_MAX_NUM_CHROMEDRIVER_INSTANCES)
         chunk = rankuri_list[i: i + GL_CRAWL_CHUNK_SIZE]
-        p.map(fetch_info, chunk)
+        p.map(fetch_info_star, itertools.izip(chunk, itertools.repeat(GL_OUTPUT_FID), itertools.repeat(GL_EXCEPTION_LOG_FILE), itertools.repeat(GL_EXCEPTION_LOG_FID)))
+        # p.map(fetch_info, chunk)
         p.close()
         p.join()
         lock_print(("%s process completed crawling %s domains. "
