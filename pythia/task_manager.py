@@ -38,7 +38,7 @@ GL_OUTPUT_LOCK = multiprocessing.Lock()
 GL_EXCEPTION_LOCK = multiprocessing.Lock()
 
 # parallel browser instances
-GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 1
+GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 5
 # chunks size to be processed in batch
 GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
