@@ -6,6 +6,7 @@ import re
 import time as time
 import traceback
 import logging
+
 logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -22,7 +23,8 @@ LOCAL_RUN = os.environ.get("LOCAL_RUN", "True") == "True"
 
 
 # NOTE: make sure that both binary and driver have the same version.
-CHROME_SERVICE = None if not LOCAL_RUN else Service(executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
+CHROME_SERVICE = None if not LOCAL_RUN else Service(
+    executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
 BRAVE_BIN_PATH = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 
 if ('gl_PATH_CHROMEDRIVER' not in globals()) or \
@@ -142,6 +144,7 @@ def download_with_browser(URL,
     cookies = None
     banner_detected = False
     screenshot_path = ""
+    first_source = None
     try:
         driver = create_driver(RUN_HEADLESS, CHROMEDRIVER_LOCK)
         if (CHROMEDRIVER_LOCK is not None) and (lock_released is False):
@@ -297,6 +300,7 @@ def download_with_browser(URL,
                 landing_url_reachable is True:
             # Get the HTML source and the <title>
             page_source = current_source
+            first_source = page_source if not first_source else first_source
             page_title = current_title
         else:
             ts = str(datetime.now()).split(".")[0]
@@ -315,10 +319,10 @@ def download_with_browser(URL,
             CHROMEDRIVER_LOCK.release()
     end_ts = time.time()
 
-    banner_dict = detect_banner(page_source)
+    banner_dict = detect_banner(first_source)
     if exception_str:
         print(exception_str)
-    return (page_source, page_title, resources_ordlist,
+    return (first_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
             start_ts, end_ts, cookies, banner_dict, screenshot_path)
 

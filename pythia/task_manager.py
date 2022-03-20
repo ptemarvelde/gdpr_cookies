@@ -1,17 +1,21 @@
 #!/usr/bin/env python
 import io
+import os
+from pathlib import Path
 from urllib.parse import urlparse
-import time
+
+import pandas as pd
 import psutil
 import requests
 from tqdm import tqdm
-from pathlib import Path
-import os
+
 from dns_resolve import *
 from extract_processed_uris import *
 from process_struct import *
 from rdap_query import *
 from selenium_driver_chrome import download_with_browser
+from util.utils import load_output
+
 
 GL_browser_PAGE_LOAD_TIMEOUT = 60
 GL_browser_RUN_HEADLESS = True
@@ -216,13 +220,14 @@ def fetch_info(ELEM, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR):
                     rdap_infos_dict[ip] = download_info_using_rdap_cache(IP=ip)
 
             dom = url_to_domain(uri)
-            source_ip_list = [x[1] for x in recursively_resolve_domain(dom)['resolutions'] if x[0] == 'A']
+            source_ip_list = [x[1] for x in recursively_resolve_domain(dom)[0] if x[0] == 'A']
             source_url_info = download_info_using_rdap_cache(IP=source_ip_list[-1]) if len(source_ip_list) > 0 else None
 
             rdap_res = {
                 "rdap_infos_dict": rdap_infos_dict,
                 "url_info": source_url_info
             }
+
             # dump the results into a json
             struct = generate_struct(
                 SOURCE_IP=GL_SOURCE_IP,
@@ -239,7 +244,7 @@ def fetch_info(ELEM, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR):
                 # dns
                 UNIQUE_DOMAINS_RESOLUTIONS=unique_domains_resolutions,
                 # rdap
-                RDAP_INFOS_DICT=rdap_infos_dict,
+                RDAP_INFOS_DICT=rdap_res,
                 COOKIES=cookies,
                 BANNER=banner,
                 SCREENSHOT_FILE=screenshot_file
@@ -275,6 +280,24 @@ def fetch_info(ELEM, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR):
         exception_str += "**** %s" % traceback.format_exc()
         lock_log_exception(GL_EXCEPTION_LOG_FILE=GL_EXCEPTION_LOG_FILE, GL_EXCEPTION_LOG_FID=None, EXC_STR=exception_str)
 
+def drop_columns_and_zip(result_file: Path):
+    keep_cols = [
+        "browser_module.cookies.cookies",
+        "browser_module.cookies.request_timestamp",
+        "browser_module.banner.banner_detected",
+        "browser_module.banner.banner_matched_on",
+        "rdap_module.url_info.asn_country_code",
+        "rdap_module.url_info.query",
+        "source_ip", "browser_module.uri",
+        "browser_module.page_source", "browser_module.screenshot_file",
+        "domain"
+    ]
+    df = load_output(result_file, keep_cols=keep_cols)
+    zip_out = ".".join(str(result_file).split(".")[:-1]) + ".json.gz"
+    lock_print(STRING=f'Selecting sub columns and zipping to {".".join(str(result_file).split(".")[:-1]) + ".json.gz"}')
+    df.to_json(zip_out, compression="gzip")
+
+
 def main():
     # output_dir = os.environ.get("OUTPUT_DIR", "../resources/" + time.strftime("output_%Y%m%d-%H%M%S"))
     output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path("../resources/" + time.strftime("output_%Y%m%d-%H%M%S")))
@@ -289,7 +312,6 @@ def main():
     GL_EXCEPTION_LOG_FILE = GL_OUTPUT_DIR / "exceptions.log"
     open(GL_EXCEPTION_LOG_FILE, 'a+', encoding='utf-8').close()
     # GL_EXCEPTION_LOG_FID = open(GL_EXCEPTION_LOG_FILE, 'a', encoding='utf-8')
-    GL_EXCEPTION_LOG_FID = None
     
     # list of URIs already processed
     GL_PROCESSED_URIS_DICT = get_list_processed_from_json(GL_OUTPUT_FILE)
@@ -326,6 +348,7 @@ def main():
         # just to be sure that everything was (hopefully!) shut down
         time.sleep(30)
         tot_processed += len(chunk)
+    drop_columns_and_zip(GL_OUTPUT_FILE)
 
 
 if __name__ == "__main__":
