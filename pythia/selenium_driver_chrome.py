@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+from banner_config import lib_js_file_names
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.chrome.service import Service
+from selenium import webdriver
+from bs4 import BeautifulSoup
+from datetime import datetime
 import json
 import os
 import re
@@ -7,17 +14,12 @@ import time as time
 import traceback
 import logging
 
+from banner_config import get_banner_patterns
+
 logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
-from datetime import datetime
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-from banner_config import lib_js_file_names
 
-USE_BRAVE = False
+USE_BRAVE = True
 LOCAL_RUN = os.environ.get("LOCAL_RUN", "True") == "True"
 # LOCAL_RUN = os.environ.get("LOCAL_RUN", "False") == "True"
 
@@ -57,8 +59,9 @@ def create_driver(run_headless=True, chromedriver_lock=None):
     # This excludes Devtools socket logging
     if USE_BRAVE:
         chrome_options.binary_location = BRAVE_BIN_PATH
-        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    
+        chrome_options.add_experimental_option(
+            'excludeSwitches', ['enable-logging'])
+
     if run_headless is True:
         chrome_options.add_argument("--headless")
     if gl_SPOOFED_USER_AGENT:
@@ -69,7 +72,7 @@ def create_driver(run_headless=True, chromedriver_lock=None):
     caps["binary_location"] = gl_PATH_CHROME_BROWSER
     # Needed for non-trusted HTTPS certificates (with 'headless'
     # mode chromedriver will ignore the other options!)
-    ## ISSUE https://bugs.chromium.org/p/chromedriver/issues/detail?id=1925
+    # ISSUE https://bugs.chromium.org/p/chromedriver/issues/detail?id=1925
     caps['acceptInsecureCerts'] = True
     # Options for instructing the browser to log the network
     # traffic visible to the user
@@ -145,6 +148,7 @@ def download_with_browser(URL,
     banner_detected = False
     screenshot_bytes = None
     first_source = None
+    screenshot_path = None
     try:
         driver = create_driver(RUN_HEADLESS, CHROMEDRIVER_LOCK)
         if (CHROMEDRIVER_LOCK is not None) and (lock_released is False):
@@ -323,7 +327,8 @@ def download_with_browser(URL,
 
     if screenshot_bytes:
         found_str = "banner_detected" if banner_dict['banner_detected'] else "no_banner_detected"
-        screenshot_path: str = str((GL_SCREENSHOT_DIR / found_str / (URL.replace('://', '_') + ".png")).resolve())
+        screenshot_path: str = str(
+            (GL_SCREENSHOT_DIR / found_str / (URL.replace('://', '_') + ".png")).resolve())
         with open(screenshot_path, 'wb') as f:
             f.write(screenshot_bytes)
 
@@ -337,7 +342,8 @@ def download_with_browser(URL,
 def detect_banner(page_html, banner_patterns) -> dict:
     # detecting banner
     matched_banner_keywords = []
-    matched_banner_keywords.extend(detect_banner_keywords(page_html, banner_patterns))
+    matched_banner_keywords.extend(
+        detect_banner_keywords(page_html, banner_patterns))
     matched_banner_keywords.extend(detect_banner_cookie_libs(page_html))
     print(len(matched_banner_keywords))
     banner_dict = {
@@ -372,11 +378,13 @@ def detect_banner_cookie_libs(page_source) -> list:
 
 if __name__ == "__main__":
     # Example: HTTPS with Chromium in headless mode
-    url = "https://amazon.com/"
+    url = "https://vimeo.com/"
+
+    banner_patterns = get_banner_patterns()
 
     (page_source, page_title, resources_ordlist,
      redirection_chain, exception, exception_str,
-     browserstart_ts, browserend_ts, cookies, banner_dict, screenshot_path) = download_with_browser(url)
+     browserstart_ts, browserend_ts, cookies, banner_dict, screenshot_path) = download_with_browser(url, BANNER_PATTERNS=banner_patterns)
     print("Start URL: %s" % (url))
     if exception is None:
         print("redirection_chain: %s" % (" => ".join([
