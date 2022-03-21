@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import json
 
+
 def generate_struct(SOURCE_IP,
                     URI,
                     # browser
@@ -12,7 +13,9 @@ def generate_struct(SOURCE_IP,
                     UNIQUE_DOMAINS_RESOLUTIONS,
                     # rdap
                     RDAP_INFOS_DICT,
-                    COOKIES):
+                    COOKIES,
+                    BANNER,
+                    SCREENSHOT_FILE):
     browser_module = {
         "uri": URI,
         "page_source": PAGE_SOURCE,
@@ -23,7 +26,9 @@ def generate_struct(SOURCE_IP,
         "exception_str": EXCEPTION_STR,
         "start_ts": BROWSERSTART_TS,
         "end_ts": BROWSEREND_TS,
-        "cookies": COOKIES
+        "cookies": COOKIES,
+        "banner": BANNER,
+        "screenshot_file": SCREENSHOT_FILE
     }
     if UNIQUE_DOMAINS_RESOLUTIONS is not None:
         dns_module = []
@@ -43,9 +48,10 @@ def generate_struct(SOURCE_IP,
             dns_module.append(dns_entry)
     else:
         dns_module = None
+
     if RDAP_INFOS_DICT is not None:
         rdap_module = []
-        for k, v in RDAP_INFOS_DICT.items():
+        for k, v in RDAP_INFOS_DICT['rdap_infos_dict'].items():
             ip = k
             # Those entries were obtained from:
             # rdap_query.py -> download_info_using_rdap_cache(...)
@@ -61,6 +67,10 @@ def generate_struct(SOURCE_IP,
                 "cache_hit": cache_hit,
             }
             rdap_module.append(rdap_entry)
+        rdap_module = {
+            'resolutions': rdap_module,
+            'url_info': RDAP_INFOS_DICT['url_info'][0]
+        }
     else:
         rdap_module = None
     page_struct = {

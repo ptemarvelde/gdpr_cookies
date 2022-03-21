@@ -1,35 +1,104 @@
 #!/usr/bin/env python3
+
+import json
+import os
+import re
+import time as time
+import traceback
+import logging
+
+logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
+from datetime import datetime
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-import json
-from collections import OrderedDict
-import time as time
-from datetime import datetime
-import traceback
-from bs4 import BeautifulSoup
-# TODO remove this package, chrome should be in the dependencies somehow
-from webdriver_manager.chrome import ChromeDriverManager
-CHROME_SERVICE = Service(ChromeDriverManager().install())
 
+from banner_config import lib_js_file_names
+
+USE_BRAVE = False
+LOCAL_RUN = os.environ.get("LOCAL_RUN", "True") == "True"
+# LOCAL_RUN = os.environ.get("LOCAL_RUN", "False") == "True"
+
+# NOTE: make sure that both binary and driver have the same version.
+CHROME_SERVICE = None if not LOCAL_RUN else Service(
+    executable_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver99.exe"))
+BRAVE_BIN_PATH = "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
 
 if ('gl_PATH_CHROMEDRIVER' not in globals()) or \
-   ('gl_PATH_CHROME_BROWSER' not in globals()) or \
-   ('gl_SPOOFED_USER_AGENT' not in globals()):
+        ('gl_PATH_CHROME_BROWSER' not in globals()) or \
+        ('gl_SPOOFED_USER_AGENT' not in globals()):
     gl_PATH_CHROMEDRIVER = "/usr/local/bin/chromedriver"
-    gl_PATH_CHROME_BROWSER = "/usr/bin/google-chrome"
+    gl_PATH_CHROME_BROWSER = "/usr/bin/google-chrome-stable"
     gl_SPOOFED_USER_AGENT = ("Mozilla/5.0 (X11; Linux x86_64) "
                              "AppleWebKit/537.36 "
                              "(KHTML, like Gecko) Chrome/70.0.3538.77 "
                              "Safari/537.36")
 
 
+def create_driver(run_headless=True, chromedriver_lock=None):
+    # Options used when launching Chrome
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--disable-extensions')
+    chrome_options.add_argument("--ignore-certificate-errors")
+    chrome_options.add_argument("--incognito")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-xss-auditor")
+    chrome_options.add_argument("--disable-background-networking")
+    chrome_options.add_argument("--mute-audio")
+    # notifications
+    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_argument("--disable-file-system")
+    chrome_options.add_argument("--allow-running-insecure-content")
+    chrome_options.add_argument("--window-size=1980,960")
+    chrome_options.add_argument("--no-sandbox")
+
+    # This excludes Devtools socket logging
+    if USE_BRAVE:
+        chrome_options.binary_location = BRAVE_BIN_PATH
+        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    
+    if run_headless is True:
+        chrome_options.add_argument("--headless")
+    if gl_SPOOFED_USER_AGENT:
+        chrome_options.add_argument("--user-agent=%s" %
+                                    gl_SPOOFED_USER_AGENT)
+    # #
+    caps = DesiredCapabilities.CHROME
+    caps["binary_location"] = gl_PATH_CHROME_BROWSER
+    # Needed for non-trusted HTTPS certificates (with 'headless'
+    # mode chromedriver will ignore the other options!)
+    ## ISSUE https://bugs.chromium.org/p/chromedriver/issues/detail?id=1925
+    caps['acceptInsecureCerts'] = True
+    # Options for instructing the browser to log the network
+    # traffic visible to the user
+    caps['goog:loggingPrefs'] = {
+        "browser": "ALL",
+        "driver": "ALL",
+        "performance": "ALL"}
+    #
+    if chromedriver_lock is not None:
+        chromedriver_lock.acquire()
+
+    kwargs = {
+        "desired_capabilities": caps,
+        "options": chrome_options,
+    }
+
+    if LOCAL_RUN:
+        kwargs['service'] = CHROME_SERVICE
+
+    return webdriver.Chrome(**kwargs)
+
+
 def download_with_browser(URL,
                           RUN_HEADLESS=True,
                           MIN_PAGE_LOAD_TIMEOUT=4,
                           PAGE_LOAD_TIMEOUT=60,
-                          CHROMEDRIVER_LOCK=None):
-
+                          CHROMEDRIVER_LOCK=None,
+                          GL_SCREENSHOT_DIR=None,
+                          BANNER_PATTERNS=None):
     def get_new_netlog_msgs(DRIVER):
         try:
             return [json.loads(elem["message"])["message"]
@@ -72,45 +141,12 @@ def download_with_browser(URL,
     exception_str = None
     lock_released = False
     start_ts, end_ts = time.time(), time.time()
+    cookies = None
+    banner_detected = False
+    screenshot_bytes = None
+    first_source = None
     try:
-        # Options used when launching Chrome
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('disable-extensions')
-        chrome_options.add_argument("ignore-certificate-errors")
-        chrome_options.add_argument("incognito")
-        chrome_options.add_argument("disable-gpu")
-        chrome_options.add_argument("disable-xss-auditor")
-        chrome_options.add_argument("disable-background-networking")
-        chrome_options.add_argument("mute-audio")
-        # notifications
-        chrome_options.add_argument("disable-notifications")
-        chrome_options.add_argument("disable-file-system")
-        chrome_options.add_argument("allow-running-insecure-content")
-        if RUN_HEADLESS is True:
-            chrome_options.add_argument("headless")
-        if gl_SPOOFED_USER_AGENT:
-            chrome_options.add_argument("--user-agent=%s" %
-                                        gl_SPOOFED_USER_AGENT)
-
-        caps = DesiredCapabilities.CHROME
-        caps["binary_location"] = gl_PATH_CHROME_BROWSER
-        # Needed for non-trusted HTTPS certificates (with 'headless'
-        # mode chromedriver will ignore the other options!)
-        ## ISSUE https://bugs.chromium.org/p/chromedriver/issues/detail?id=1925
-        caps['acceptInsecureCerts'] = True
-
-        # Options for instructing the browser to log the network
-        # traffic visible to the user
-        caps['goog:loggingPrefs'] = {
-            "browser": "ALL",
-            "driver": "ALL",
-            "performance": "ALL"}
-
-        if CHROMEDRIVER_LOCK is not None:
-            CHROMEDRIVER_LOCK.acquire()
-        driver = webdriver.Chrome(desired_capabilities=caps,
-                                  options=chrome_options,
-                                  service=CHROME_SERVICE, )
+        driver = create_driver(RUN_HEADLESS, CHROMEDRIVER_LOCK)
         if (CHROMEDRIVER_LOCK is not None) and (lock_released is False):
             CHROMEDRIVER_LOCK.release()
             lock_released = True
@@ -118,14 +154,24 @@ def download_with_browser(URL,
         # Fetch the resource and all embedded URLs
         driver.set_page_load_timeout(PAGE_LOAD_TIMEOUT)
         req_timestamp = time.time()
-        driver.get(URL)
+        try:
+            driver.get(URL)
+        except Exception as e:
+            driver.get(URL)
 
         cookies_list = driver.get_cookies()
         cookies = {
             "request_timestamp": req_timestamp,
             "cookies": cookies_list
         }
-
+        # sleep to let banner appear
+        time.sleep(5)
+        screenshot_bytes = None
+        current_source = driver.page_source
+        if GL_SCREENSHOT_DIR:
+            screenshot_bytes = driver.get_screenshot_as_png()
+            if not screenshot_bytes:
+                screenshot_path = None
         # We need to put it into a variable, otherwise when
         # calling again "driver.get_log('performance')" it will
         # return None.
@@ -134,10 +180,10 @@ def download_with_browser(URL,
         landing_url_reachable = True
         for message in driver_network_log_messages:
             if (message["method"] == "Page.frameNavigated") and \
-               ("params" in message) and \
-               ("frame" in message["params"]) and \
-               ("unreachableUrl" in message["params"]["frame"] and \
-        message["params"]["frame"]["unreachableUrl"] == driver.current_url):
+                    ("params" in message) and \
+                    ("frame" in message["params"]) and \
+                    ("unreachableUrl" in message["params"]["frame"] and
+                     message["params"]["frame"]["unreachableUrl"] == driver.current_url):
                 landing_url_reachable = False
         if landing_url_reachable:
             # if there's a minimum waiting treshold, we wait in case
@@ -145,7 +191,7 @@ def download_with_browser(URL,
             if MIN_PAGE_LOAD_TIMEOUT > 0:
                 time.sleep(MIN_PAGE_LOAD_TIMEOUT)
                 driver_network_log_messages += get_new_netlog_msgs(
-                        DRIVER=driver)
+                    DRIVER=driver)
                 PAGE_LOAD_TIMEOUT -= MIN_PAGE_LOAD_TIMEOUT
             tot_slept, s = [0], 0
             while s < PAGE_LOAD_TIMEOUT:
@@ -160,7 +206,7 @@ def download_with_browser(URL,
                     if len(tot_slept) == 1:
                         tot_slept.append(1)
                     else:
-                        tot_slept.append(tot_slept[-1]+tot_slept[-2])
+                        tot_slept.append(tot_slept[-1] + tot_slept[-2])
                         s = sum(tot_slept)
                         if s > PAGE_LOAD_TIMEOUT:
                             tot_slept[-1] -= s - PAGE_LOAD_TIMEOUT
@@ -175,7 +221,7 @@ def download_with_browser(URL,
                 data = message["params"]["response"]
                 resources_ordlist.append((url, data))
             elif (method == "Network.requestWillBeSent") and \
-                 ("redirectResponse" in message["params"]):
+                    ("redirectResponse" in message["params"]):
                 url = message["params"]["redirectResponse"]["url"]
                 data = message["params"]["redirectResponse"]
                 resources_ordlist.append((url, data))
@@ -184,8 +230,8 @@ def download_with_browser(URL,
                 tmp_redirection_chain.append((url_from, url_to))
             elif method == "Page.frameNavigated":
                 if ("params" in message) and \
-                   ("frame" in message["params"]) and \
-                   ("parentId" not in message["params"]["frame"]):
+                        ("frame" in message["params"]) and \
+                        ("parentId" not in message["params"]["frame"]):
                     if "unreachableUrl" in message["params"]["frame"]:
                         url = message["params"]["frame"]["unreachableUrl"]
                     elif "url" in message["params"]["frame"]:
@@ -194,14 +240,14 @@ def download_with_browser(URL,
                         loaded_urls.append(url)
             elif method == "Page.navigatedWithinDocument":
                 if ("params" in message) and \
-                   ("url" in message["params"]):
+                        ("url" in message["params"]):
                     url = message["params"]["url"]
                     if not url.startswith("data:"):
                         loaded_urls.append(url)
             elif method == "Page.frameScheduledNavigation":
                 if ("url" in message["params"]) and \
-                   ("reason" in message["params"]) and \
-                   (message["params"]["reason"] == "metaTagRefresh"):
+                        ("reason" in message["params"]) and \
+                        (message["params"]["reason"] == "metaTagRefresh"):
                     url = message["params"]["url"]
                     loaded_urls.append(url)
         current_url = driver.current_url
@@ -250,10 +296,11 @@ def download_with_browser(URL,
                         if url_to == redirection_chain[0]:
                             redirection_chain.insert(0, url_from)
         if (len(redirection_chain) >= 1) and \
-           (redirection_chain[-1] == current_url) and \
-           landing_url_reachable is True:
+                (current_url in redirection_chain) and \
+                landing_url_reachable is True:
             # Get the HTML source and the <title>
             page_source = current_source
+            first_source = page_source if not first_source else first_source
             page_title = current_title
         else:
             ts = str(datetime.now()).split(".")[0]
@@ -271,18 +318,65 @@ def download_with_browser(URL,
         if (CHROMEDRIVER_LOCK is not None) and (lock_released is False):
             CHROMEDRIVER_LOCK.release()
     end_ts = time.time()
-    return (page_source, page_title, resources_ordlist,
+
+    banner_dict = detect_banner(first_source, BANNER_PATTERNS)
+
+    if screenshot_bytes:
+        found_str = "banner_detected" if banner_dict['banner_detected'] else "no_banner_detected"
+        screenshot_path: str = str((GL_SCREENSHOT_DIR / found_str / (URL.replace('://', '_') + ".png")).resolve())
+        with open(screenshot_path, 'wb') as f:
+            f.write(screenshot_bytes)
+
+    if exception_str:
+        print(exception_str)
+    return (first_source, page_title, resources_ordlist,
             redirection_chain, exception, exception_str,
-            start_ts, end_ts, cookies)
+            start_ts, end_ts, cookies, banner_dict, screenshot_path)
+
+
+def detect_banner(page_html, banner_patterns) -> dict:
+    # detecting banner
+    matched_banner_keywords = []
+    matched_banner_keywords.extend(detect_banner_keywords(page_html, banner_patterns))
+    matched_banner_keywords.extend(detect_banner_cookie_libs(page_html))
+    print(len(matched_banner_keywords))
+    banner_dict = {
+        'banner_detected': len(matched_banner_keywords) > 0,
+        'banner_matched_on': matched_banner_keywords
+    }
+
+    return banner_dict
+
+
+def detect_banner_keywords(page_html, banner_patterns) -> list:
+    banner_matched_keywords = []
+    if page_html:
+        logging.debug(f"First 100 chars in page html: {page_html[:100]}")
+        for pattern in banner_patterns:
+            logging.debug(f'pattern: {pattern}')
+            if re.search(pattern, page_html, flags=re.IGNORECASE):
+                banner_matched_keywords.append(pattern)
+    print(f"{banner_matched_keywords = }")
+    return banner_matched_keywords
+
+
+def detect_banner_cookie_libs(page_source) -> list:
+    matched_patterns = []
+    if page_source:
+        for pattern in lib_js_file_names:
+            if re.search(pattern, page_source, flags=re.IGNORECASE):
+                matched_patterns += [pattern]
+    print(f"{matched_patterns = }")
+    return matched_patterns
 
 
 if __name__ == "__main__":
-
     # Example: HTTPS with Chromium in headless mode
-    url = "https://bitbucket.org/"
-    (page_source, page_title, resources_ordlist, redirection_chain,
-     exception, exception_str, browserstart_ts,
-     browserend_ts, cookies) = download_with_browser(url)
+    url = "https://amazon.com/"
+
+    (page_source, page_title, resources_ordlist,
+     redirection_chain, exception, exception_str,
+     browserstart_ts, browserend_ts, cookies, banner_dict, screenshot_path) = download_with_browser(url)
     print("Start URL: %s" % (url))
     if exception is None:
         print("redirection_chain: %s" % (" => ".join([
@@ -306,4 +400,5 @@ if __name__ == "__main__":
         print()
     print("cookies:", json.dumps(cookies, indent=4))
     print("Time spent: %4.2f seconds" % (browserend_ts - browserstart_ts))
+    print(f"banner dict: {json.dumps(cookies, indent=4)}")
     print()

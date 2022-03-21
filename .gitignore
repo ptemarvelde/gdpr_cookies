@@ -2,3 +2,8 @@
 pythia/__pycache__/
 pythia/samples/
 venv
+*.pdf
+/resources/*
+!/resources/input
+!/resources/input/*
+__pycache__

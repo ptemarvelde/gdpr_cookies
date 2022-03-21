@@ -9,3 +9,9 @@ netaddr
 nltk
 psutil
 webdriver_manager
+pandas
+requests
+tldextract
+tqdm
+matplotlib
+deep-translator
