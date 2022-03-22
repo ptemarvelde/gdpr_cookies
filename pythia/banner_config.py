@@ -55,8 +55,7 @@ lib_js_file_names = [
     'js-cookie-compliance__agree|simple_cookie_compliance\.js|simple_cookie_compliance\.css|class=\"cookie-compliance__button js-cookie-compliance__agree\"|<div class=\"cookie-compliance__inner\">|<div class=\"cookie-compliance__text\">',
     # Simple Cookie Compliance
     "evidon-banner\.js",  # Crownpeak (Evidon)
-    "evidon.*.js",  # Crownpeak (Evidon)
-    "didomi",  # Didomi
+    "evidon\.js",  # Crownpeak (Evidon)
     "consent.js",
     "cookie-consent",
     "gdpr.bundle.js"

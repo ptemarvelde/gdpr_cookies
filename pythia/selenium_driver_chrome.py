@@ -19,7 +19,7 @@ from banner_config import get_banner_patterns
 logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
 
 
-USE_BRAVE = True
+USE_BRAVE = False
 LOCAL_RUN = os.environ.get("LOCAL_RUN", "True") == "True"
 # LOCAL_RUN = os.environ.get("LOCAL_RUN", "False") == "True"
 
@@ -271,7 +271,7 @@ def download_with_browser(URL,
     except Exception as e:
         ts = str(datetime.now()).split(".")[0]
         exception = str(e).split("\n")[0]
-        exception_str = "[%s] Exception: %s\n" % (ts, exception)
+        exception_str = "[%s] Exception thrown: %s\n" % (ts, exception)
         exception_str += "* SCRIPT=selenium_driver_chrome.py\n"
         exception_str += "** FUNCTION=download_with_browser\n"
         exception_str += "*** URL=%s\n" % (URL)
@@ -372,13 +372,13 @@ def detect_banner_cookie_libs(page_source) -> list:
         for pattern in lib_js_file_names:
             if re.search(pattern, page_source, flags=re.IGNORECASE):
                 matched_patterns += [pattern]
-    print(f"{matched_patterns = }")
+    print(f"lib_js_{matched_patterns = }")
     return matched_patterns
 
 
 if __name__ == "__main__":
     # Example: HTTPS with Chromium in headless mode
-    url = "https://vimeo.com/"
+    url = "fedex.com"
 
     banner_patterns = get_banner_patterns()
 
