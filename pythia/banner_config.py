@@ -59,9 +59,9 @@ lib_js_file_names = [
     # Simple Cookie Compliance
     "evidon-banner\.js",  # Crownpeak (Evidon)
     "evidon\.js",  # Crownpeak (Evidon)
-    "consent.js",
+    "(?<!fp)consent\.js",
     "cookie-consent",
-    "gdpr.bundle.js"
+    "gdpr\.bundle\.js"
 ]
 
 banner_patterns_translate = [
