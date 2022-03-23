@@ -323,7 +323,7 @@ def download_with_browser(URL,
             CHROMEDRIVER_LOCK.release()
     end_ts = time.time()
 
-    banner_dict = detect_banner(first_source, BANNER_PATTERNS)
+    banner_dict = detect_banner(current_url, first_source, BANNER_PATTERNS)
 
     if screenshot_bytes:
         found_str = "banner_detected" if banner_dict['banner_detected'] else "no_banner_detected"
@@ -339,13 +339,28 @@ def download_with_browser(URL,
             start_ts, end_ts, cookies, banner_dict, screenshot_path)
 
 
-def detect_banner(page_html, banner_patterns) -> dict:
+def detect_banner(page_url, page_html, banner_patterns) -> dict:
     # detecting banner
     matched_banner_keywords = []
+    
+    print(page_url)
+    # delete all content with <noscript> tags, if they exist
+    html = BeautifulSoup(page_html, "html.parser")
+    noscript_tag = html.select('noscript')
+    if noscript_tag:
+        for s in noscript_tag:
+            s.extract()
+    page_html = str(html)
+
     matched_banner_keywords.extend(
-        detect_banner_keywords(page_html, banner_patterns))
-    matched_banner_keywords.extend(detect_banner_cookie_libs(page_html))
+        detect_banner_keywords(page_html, banner_patterns)
+    )
+    matched_banner_keywords.extend(
+        detect_banner_cookie_libs(page_html)
+    )
+
     print(len(matched_banner_keywords))
+
     banner_dict = {
         'banner_detected': len(matched_banner_keywords) > 0,
         'banner_matched_on': matched_banner_keywords

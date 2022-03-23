@@ -1,10 +1,2 @@
-1,nos.nl
-2,trouw.nl
-3,google.nl
-4,amazon.com
-5,facebook.nl
-6,vangoghmuseum.nl
-7,onetrust.com
-8,trustarc.com
-9,gdpr.clickio.com
-10,civicuk.com
+1,fedex.com
+2,goodreads.com/
