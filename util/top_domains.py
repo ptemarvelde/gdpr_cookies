@@ -7,6 +7,7 @@ from typing import Tuple
 import pandas as pd
 import requests
 from tldextract import tldextract
+import sys
 
 
 def get_domains() -> Tuple[pd.DataFrame, pd.DataFrame]:

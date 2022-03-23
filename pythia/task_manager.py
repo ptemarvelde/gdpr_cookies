@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 import psutil
 import requests
 from tqdm import tqdm
+import sys
+
 
 from banner_config import get_banner_patterns
 from dns_resolve import *
