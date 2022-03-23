@@ -44,7 +44,9 @@ GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
 GL_CRAWL_CHUNK_SLEEP = 30
 
-in_file = "dutch_top_50" if os.environ.get("DUTCH_DOMAINS", "False") == "True" else "world_top_500"
+# in_file = "dutch_top_50" if os.environ.get("DUTCH_DOMAINS", "False") == "True" else "world_top_500"
+in_file = sys.argv[1]
+
 GL_URI_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path(f"../resources/input/{in_file}.csv"))
 
 GL_MAX_DOMAINS_TO_CONTACT = 1000000
