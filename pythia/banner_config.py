@@ -4,6 +4,9 @@ import os
 import logging
 import json
 
+languages = ["fi", "pl", "hi"]
+
+
 logging.getLogger().setLevel(os.environ.get("DRIVER_LOG_LEVEL", "INFO"))
 logging.getLogger('urllib3').setLevel("WARNING")
 lib_js_file_names = [
@@ -117,7 +120,6 @@ banner_patterns_no_translate = [
     "TrustArc",
 ]
 
-languages = ["fr", "es", "hi"]
 
 
 # Translate the given word to the given language. The language should be in abbreviation form, e.g 'nl' or 'de'.
