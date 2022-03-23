@@ -25,7 +25,7 @@ def get_and_write_domains(target_dir: str, dutch_limit: int = 50, world_limit: i
     dutch_df, world_df = get_domains()
     write_domain_df_to_csv(dutch_df[:dutch_limit], target_dir / f'dutch_top_{dutch_limit}.csv')
     write_domain_df_to_csv(world_df[:world_limit], target_dir / f'world_top_{world_limit}.csv')
-    write_domain_df_to_csv(pd.concat(world_df[:world_limit], dutch_df[:dutch_limit], ignore_index=True), target_dir / f'combined_{world_limit + dutch_limit}.csv')
+    write_domain_df_to_csv(pd.concat([world_df[:world_limit], dutch_df[:dutch_limit]], ignore_index=True), target_dir / f'combined_{world_limit + dutch_limit}.csv')
 
 
 def write_domain_df_to_csv(df_: pd.DataFrame, file: Path) -> None:
