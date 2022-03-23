@@ -88,7 +88,10 @@ banner_patterns_translate = [
     "Cookie Consent",
     "Cookie Information",
     "We use cookies and similar",
-    "cookies to provide"
+    "cookies to provide",
+    "cookie voorkeuren",
+    "cookies voorkeuren",
+    "to use cookies"
 ]
 
 banner_patterns_no_translate = [
