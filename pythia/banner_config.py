@@ -30,7 +30,7 @@ lib_js_file_names = [
     "jquery-eu-cookie-law-popup(\.js|\.css)",  # jQuery EU Cookie Law popups
     "user_cookie_already_accepted|user_cookie_consent_changed",  # jQuery EU Cookie Law popups (events regex)
     "otBannerSdk(\.js)?|(ot|onetrust)-banner(-sdk)?|(window\.)?OneTrust(\.LoadBanner)?",  # OneTrust
-    "Quantcast|window\._qevents|pixel\.quantserve\.com(\/pixel)?",  # Quantcast Choice
+    "window\._qevents|pixel\.quantserve\.com(\/pixel)?",  # Quantcast Choice
     "truste-consent-button|truste-consent-required|truste-show-consent|consent\.trustarc\.com",  # TrustArc (TRUSTe)
     "cookie(-|_)bar(-js|-css|\.css|\.js)|cookie_bar_message|cookie_bar_button|cookie_bar_btn_bg_colour",
     # Cookie Bar (WordPress Plugins)
