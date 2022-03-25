@@ -308,7 +308,7 @@ def drop_columns_and_zip(result_file: Path):
     zip_out = ".".join(str(result_file).split(".")[:-1]) + ".json.gz"
     lock_print(STRING=f'Selecting sub columns and zipping to {".".join(str(result_file).split(".")[:-1]) + ".json.gz"}')
 
-    lock_print(STRING=f"Writing {len(df.columns)} columns, {len(df)} rows")
+    lock_print(STRING=f"Writing {len(df.columns)} columns, {len(df)} rows to {zip_out}")
 
     df.to_json(zip_out, compression="gzip")
 
