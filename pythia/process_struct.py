@@ -69,7 +69,8 @@ def generate_struct(SOURCE_IP,
             rdap_module.append(rdap_entry)
         rdap_module = {
             'resolutions': rdap_module,
-            'url_info': RDAP_INFOS_DICT['url_info'][0]
+            'url_info': RDAP_INFOS_DICT['url_info'][0],
+            'loc_info': RDAP_INFOS_DICT['ip_location_info']
         }
     else:
         rdap_module = None

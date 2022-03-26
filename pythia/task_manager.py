@@ -45,7 +45,7 @@ GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
 GL_CRAWL_CHUNK_SLEEP = 30
 
-if len(sys.argv) > 0:
+if len(sys.argv) > 1:
     in_file = sys.argv[1]
 else:
     in_file = "dutch_top_50.csv" if os.environ.get("DUTCH_DOMAINS", "False") == "True" else "world_top_500.csv"
@@ -231,9 +231,17 @@ def fetch_info(ELEM, GL_OUTPUT_FILE, GL_EXCEPTION_LOG_FILE, GL_SCREENSHOT_DIR, B
             source_ip_list = [x[1] for x in recursively_resolve_domain(dom)[0] if x[0] == 'A']
             source_url_info = download_info_using_rdap_cache(IP=source_ip_list[-1]) if len(source_ip_list) > 0 else None
 
+            ip_location_dict = dict()
+            try:
+                ip_location_dict = requests.get(f"https://api.freegeoip.app/json/{source_ip_list[-1]}?apikey="
+                                                f"{os.environ.get('GEOIP_API_KEY')}").json()
+            except Exception:
+                pass
+
             rdap_res = {
                 "rdap_infos_dict": rdap_infos_dict,
-                "url_info": source_url_info
+                "url_info": source_url_info,
+                "ip_location_info": ip_location_dict
             }
 
             # dump the results into a json
@@ -296,11 +304,12 @@ def drop_columns_and_zip(result_file: Path):
         "browser_module.cookies.request_timestamp",
         "browser_module.banner.banner_detected",
         "browser_module.banner.banner_matched_on",
-        "rdap_module.url_info.asn_country_code",
-        "rdap_module.url_info.query",
         "source_ip", "browser_module.uri",
         "browser_module.screenshot_file",
-        "domain"
+        "domain",
+        'target_ip',
+        'target_ip_country_code',
+        'target_asn_country_code'
     ]
     df = load_output(result_file, keep_cols=keep_cols)
     zip_out = ".".join(str(result_file).split(".")[:-1]) + ".json.gz"
