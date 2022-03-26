@@ -323,12 +323,17 @@ def download_with_browser(URL,
             CHROMEDRIVER_LOCK.release()
     end_ts = time.time()
 
+<<<<<<< HEAD
     banner_dict = detect_banner(current_url, first_source, BANNER_PATTERNS)
+=======
+    banner_dict = detect_banner(first_source, BANNER_PATTERNS, url=URL)
+>>>>>>> master
 
     if screenshot_bytes:
         found_str = "banner_detected" if banner_dict['banner_detected'] else "no_banner_detected"
         screenshot_path: str = str(
             (GL_SCREENSHOT_DIR / found_str / (URL.replace('://', '_') + ".png")).resolve())
+        print(screenshot_path)
         with open(screenshot_path, 'wb') as f:
             f.write(screenshot_bytes)
 
@@ -339,6 +344,7 @@ def download_with_browser(URL,
             start_ts, end_ts, cookies, banner_dict, screenshot_path)
 
 
+<<<<<<< HEAD
 def detect_banner(page_url, page_html, banner_patterns) -> dict:
     # detecting banner
     matched_banner_keywords = []
@@ -361,9 +367,19 @@ def detect_banner(page_url, page_html, banner_patterns) -> dict:
 
     print(len(matched_banner_keywords))
 
+=======
+def detect_banner(page_html, banner_patterns, url='') -> dict:
+    # detecting banner
+    banner_matched_keywords = detect_banner_keywords(page_html, banner_patterns)
+    print(f"{url} matched keywords:{banner_matched_keywords = }")
+    matched_patterns = detect_banner_cookie_libs(page_html)
+    print(f"{url} lib_js_{matched_patterns = }")
+    banner_matched_keywords.extend(matched_patterns)
+    print(f"{url} matched on {len(banner_matched_keywords)} total expressions")
+>>>>>>> master
     banner_dict = {
-        'banner_detected': len(matched_banner_keywords) > 0,
-        'banner_matched_on': matched_banner_keywords
+        'banner_detected': len(banner_matched_keywords) > 0,
+        'banner_matched_on': banner_matched_keywords
     }
 
     return banner_dict
@@ -377,7 +393,6 @@ def detect_banner_keywords(page_html, banner_patterns) -> list:
             logging.debug(f'pattern: {pattern}')
             if re.search(pattern, page_html, flags=re.IGNORECASE):
                 banner_matched_keywords.append(pattern)
-    print(f"{banner_matched_keywords = }")
     return banner_matched_keywords
 
 
@@ -387,7 +402,6 @@ def detect_banner_cookie_libs(page_source) -> list:
         for pattern in lib_js_file_names:
             if re.search(pattern, page_source, flags=re.IGNORECASE):
                 matched_patterns += [pattern]
-    print(f"lib_js_{matched_patterns = }")
     return matched_patterns
 
 
