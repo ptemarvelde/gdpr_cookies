@@ -8,7 +8,7 @@ ENV DRIVER_LOG_LEVEL=INFO
 WORKDIR /usr/workspace/pythia
 
 # CMD ["python3", "selenium_driver_chrome.py"]
-CMD ["python3", "task_manager.py", "combined_final_domains.csv"]
+CMD ["python3", "task_manager.py", "combined_830.csv"]
 
 # TO run for development: # in root dir of project
 # docker build . -t selenium:latest

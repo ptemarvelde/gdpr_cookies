@@ -342,12 +342,13 @@ def download_with_browser(URL,
 
 def detect_banner(page_html, banner_patterns, url='') -> dict:
     # delete all content with <noscript> tags, if they exist
-    html = BeautifulSoup(page_html, "html.parser")
-    noscript_tag = html.select('noscript')
-    if noscript_tag:
-        for s in noscript_tag:
-            s.extract()
-    page_html = str(html)
+    if page_html:
+        html = BeautifulSoup(page_html, "html.parser")
+        noscript_tag = html.select('noscript')
+        if noscript_tag:
+            for s in noscript_tag:
+                s.extract()
+        page_html = str(html)
 
     # detecting banner
     banner_matched_keywords = detect_banner_keywords(page_html, banner_patterns)
