@@ -34,11 +34,9 @@ def load_output(output_file, keep_cols: Union[list, str] = None) -> pd.DataFrame
 
     df_ = pd.json_normalize(df_inter['json_element'].apply(json.loads))
 
-    # TODO extract (base) domain
     df_['domain'] = df_['browser_module.uri'].apply(domain_from_uri)
     df_['browser_module.cookies.cookies'] = df_[
-        ['browser_module.cookies.request_timestamp', 'browser_module.cookies.cookies']].apply(calc_cookie_duration,
-                                                                                              axis=1)
+        ['browser_module.cookies.request_timestamp', 'browser_module.cookies.cookies']].apply(calc_cookie_duration,                                                                                 axis=1)
 
     df_['target_ip'] = df_['rdap_module.loc_info.ip']
     df_['target_ip_country_code'] = df_['rdap_module.loc_info.country_code']
