@@ -9,7 +9,6 @@ import requests
 from tqdm import tqdm
 import sys
 
-
 from banner_config import get_banner_patterns
 from dns_resolve import *
 from extract_processed_uris import *
@@ -40,7 +39,7 @@ GL_OUTPUT_LOCK = multiprocessing.Lock()
 GL_EXCEPTION_LOCK = multiprocessing.Lock()
 
 # parallel browser instances
-GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 5
+GL_MAX_NUM_CHROMEDRIVER_INSTANCES = 10
 # chunks size to be processed in batch
 GL_CRAWL_CHUNK_SIZE = 20
 # sleep after processing a chunk
@@ -49,10 +48,9 @@ GL_CRAWL_CHUNK_SLEEP = 30
 if len(sys.argv) > 0:
     in_file = sys.argv[1]
 else:
-    in_file = "dutch_top_50" if os.environ.get("DUTCH_DOMAINS", "False") == "True" else "world_top_500"
+    in_file = "dutch_top_50.csv" if os.environ.get("DUTCH_DOMAINS", "False") == "True" else "world_top_500.csv"
 
-
-GL_URI_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path(f"../resources/input/{in_file}.csv"))
+GL_URI_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), Path(f"../resources/input/{in_file}"))
 
 GL_MAX_DOMAINS_TO_CONTACT = 1000000
 GL_SHUFFLE_DOMAINS_LIST = True
