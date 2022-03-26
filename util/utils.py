@@ -37,16 +37,17 @@ def load_output(output_file, keep_cols: Union[list, str] = None) -> pd.DataFrame
         ['browser_module.cookies.request_timestamp', 'browser_module.cookies.cookies']].apply(calc_cookie_duration,
                                                                                               axis=1)
 
-    # df_['rdap_module.ip'] = df_[['rdap_module.url_info']].apply(lambda x: x['query'], axis=1)
-    # df_['rdap_module.country_code'] = df_[['rdap_module.url_info']].apply(lambda x: x['asn_country_code'], axis=1)
+    df_['rdap_module.ip'] = df_['rdap_module.url_info.query']
+    df_['rdap_module.country_code'] = df_['rdap_module.url_info.asn_country_code']
     resdf = df_[keep_cols] if keep_cols != 'all' else df_
     return resdf
 
 
 def calc_cookie_duration(row: pd.Series) -> List[dict]:
     timestamp, cookies = row[0], row[1]
-    for cookie in cookies:
-        cookie[COOKIE_DURATION_COLUMN] = cookie.get('expiry', timestamp) - timestamp
+    if timestamp and not isinstance(cookies, float):
+        for cookie in cookies:
+            cookie[COOKIE_DURATION_COLUMN] = cookie.get('expiry', timestamp) - timestamp
     return cookies
 
 

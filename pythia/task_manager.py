@@ -314,6 +314,9 @@ def drop_columns_and_zip(result_file: Path):
 
 
 def main():
+    drop_columns_and_zip("../resources/california_830/californiaresults.jsonl")
+    return
+
     output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                               Path(("../resources/" +
                                     (os.environ.get("OUTPUT_DIR") or

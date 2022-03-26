@@ -38,4 +38,5 @@ def write_domain_df_to_csv(df_: pd.DataFrame, file: Path) -> None:
 if __name__ == '__main__':
     dutch_limit = int(sys.argv[1])
     world_limit = int(sys.argv[2])
+    print(f"Getting top {dutch_limit} .nl domains & top {world_limit} world domains")
     get_and_write_domains('../resources/input', dutch_limit=dutch_limit, world_limit=world_limit)
