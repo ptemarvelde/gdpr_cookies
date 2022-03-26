@@ -323,11 +323,7 @@ def download_with_browser(URL,
             CHROMEDRIVER_LOCK.release()
     end_ts = time.time()
 
-<<<<<<< HEAD
-    banner_dict = detect_banner(current_url, first_source, BANNER_PATTERNS)
-=======
     banner_dict = detect_banner(first_source, BANNER_PATTERNS, url=URL)
->>>>>>> master
 
     if screenshot_bytes:
         found_str = "banner_detected" if banner_dict['banner_detected'] else "no_banner_detected"
@@ -344,12 +340,7 @@ def download_with_browser(URL,
             start_ts, end_ts, cookies, banner_dict, screenshot_path)
 
 
-<<<<<<< HEAD
-def detect_banner(page_url, page_html, banner_patterns) -> dict:
-    # detecting banner
-    matched_banner_keywords = []
-    
-    print(page_url)
+def detect_banner(page_html, banner_patterns, url='') -> dict:
     # delete all content with <noscript> tags, if they exist
     html = BeautifulSoup(page_html, "html.parser")
     noscript_tag = html.select('noscript')
@@ -358,17 +349,6 @@ def detect_banner(page_url, page_html, banner_patterns) -> dict:
             s.extract()
     page_html = str(html)
 
-    matched_banner_keywords.extend(
-        detect_banner_keywords(page_html, banner_patterns)
-    )
-    matched_banner_keywords.extend(
-        detect_banner_cookie_libs(page_html)
-    )
-
-    print(len(matched_banner_keywords))
-
-=======
-def detect_banner(page_html, banner_patterns, url='') -> dict:
     # detecting banner
     banner_matched_keywords = detect_banner_keywords(page_html, banner_patterns)
     print(f"{url} matched keywords:{banner_matched_keywords = }")
@@ -376,7 +356,10 @@ def detect_banner(page_html, banner_patterns, url='') -> dict:
     print(f"{url} lib_js_{matched_patterns = }")
     banner_matched_keywords.extend(matched_patterns)
     print(f"{url} matched on {len(banner_matched_keywords)} total expressions")
->>>>>>> master
+    
+    print(url)
+    print(len(banner_matched_keywords))
+
     banner_dict = {
         'banner_detected': len(banner_matched_keywords) > 0,
         'banner_matched_on': banner_matched_keywords
