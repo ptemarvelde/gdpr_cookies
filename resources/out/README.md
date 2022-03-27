@@ -1,6 +1,6 @@
 # combined_output.json.gz
 
-This describes the output data gathered by querying a list of top domains (of the world and the Netherlands) from 6 different locations in the world.
+This describes the output data gathered by querying a list of top domains (of the world and the Netherlands) from 6 different locations in the world, then stacking the results of each run on top of eachother. The result is a Dataframe with 4488 rows (748 domains succesfully queried per country).
 
 ## Loading into pandas dataframe:
 `df = pd.read_json('combined_output.json.gz', compression='gzip')`
