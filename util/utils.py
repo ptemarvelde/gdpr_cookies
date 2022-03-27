@@ -72,7 +72,7 @@ def main():
         "source_ip", 
         "browser_module.uri",
         "browser_module.screenshot_file",
-        "browser_module.page_source"
+        "browser_module.page_source",
         "domain",
         'target_ip',
         'target_ip_country_code',
@@ -81,6 +81,7 @@ def main():
 
     df = load_output(result_file, keep_cols=keep_cols)
     zip_out = ".".join(str(result_file).split(".")[:-1]) + ".json.gz"
+    print(f"Writing {len(df.columns)} columns, {len(df)} rows to {zip_out}")
     df.to_json(zip_out, compression="gzip")
 
 
