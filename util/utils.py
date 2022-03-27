@@ -55,3 +55,30 @@ def calc_cookie_duration(row: pd.Series) -> List[dict]:
 
 def domain_from_uri(uri: str) -> str:
     return '.'.join(extract(uri)[-2:])
+
+
+def main():
+    keep_cols = [
+        "browser_module.cookies.cookies",
+        "browser_module.cookies.request_timestamp",
+        "browser_module.banner.banner_detected",
+        "browser_module.banner.banner_matched_on",
+        "source_ip", 
+        "browser_module.uri",
+        "browser_module.screenshot_file",
+        "browser_module.page_source"
+        "domain",
+        'target_ip',
+        'target_ip_country_code',
+        'target_asn_country_code'
+    ]
+
+    result_file = sys.argv[1]
+
+    df = load_output(result_file, keep_cols=keep_cols)
+    zip_out = ".".join(str(result_file).split(".")[:-1]) + ".json.gz"
+    df.to_json(zip_out, compression="gzip")
+
+
+if __name__ == "__main__":
+    main()
