@@ -2,6 +2,7 @@ import json
 from typing import List, Union
 
 import pandas as pd
+import sys
 from tldextract import extract
 
 COOKIE_DURATION_COLUMN = 'duration_s'
