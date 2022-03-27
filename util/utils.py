@@ -61,9 +61,9 @@ def domain_from_uri(uri: str) -> str:
 def main():
     result_file = sys.argv[1]
 
-    result_file.replace('/home/ptemarvelde/gdpr_cookies', '/usr/workspace')
+    result_file = result_file.replace('/home/ptemarvelde/gdpr_cookies', '/usr/workspace')
 
-    print("Running utils.py main with file: {result_file}")
+    print(f"Running utils.py main with file: {result_file}")
     keep_cols = [
         "browser_module.cookies.cookies",
         "browser_module.cookies.request_timestamp",
