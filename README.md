@@ -34,3 +34,6 @@ Build image
 Run image (may need `sudo` for docker, so add it before the run command or do `sudo su`)
 
     docker run -v ${PWD}:/usr/workspace --env VM_LOCATION=$(< /etc/hostname) --env DUTCH_DOMAINS=True -it --shm-size=2048m hacking-lab-crawler:latest
+    
+## Pythia Extensions  
+Pythia is extended in this projct with the goal of achieving the right output of the results and a proper way of handling requests and responses using local selenium  chrome driver.
