@@ -36,4 +36,5 @@ Run image (may need `sudo` for docker, so add it before the run command or do `s
     docker run -v ${PWD}:/usr/workspace --env VM_LOCATION=$(< /etc/hostname) --env DUTCH_DOMAINS=True -it --shm-size=2048m hacking-lab-crawler:latest
     
 ## Pythia Extensions  
-Pythia is extended in this projct with the goal of achieving the right output of the results and a proper way of handling requests and responses using local selenium  chrome driver.
+Pythia is extended in this projct with the goal of achieving the right output of the results and a proper way of handling requests and responses using local selenium  chrome driver.  
+In file `banner_config,py` the patterns for regex matching is contained along with translation function. `get_banner_patterns` function translates the keywords that need to be translated using Google Translate library. The function also gathers all the required patterns in one list and returns it. 
